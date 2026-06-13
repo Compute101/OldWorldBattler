@@ -1,9 +1,9 @@
 import { useRef } from 'react';
-import type { Unit } from '../types';
-import { footprintInches, screenToBoardPoint } from '../units';
+import type { Terrain } from '../types';
+import { screenToBoardPoint } from '../units';
 
 interface Props {
-  unit: Unit;
+  terrain: Terrain;
   selected: boolean;
   onSelect: (id: string) => void;
   onMove: (id: string, x: number, y: number) => void;
@@ -11,8 +11,7 @@ interface Props {
   snapIn: number;
 }
 
-export default function UnitToken({ unit, selected, onSelect, onMove, svgRef, snapIn }: Props) {
-  const { widthIn, depthIn } = footprintInches(unit);
+export default function TerrainToken({ terrain, selected, onSelect, onMove, svgRef, snapIn }: Props) {
   const dragOffset = useRef<{ dx: number; dy: number } | null>(null);
 
   function toBoardPoint(clientX: number, clientY: number) {
@@ -23,9 +22,9 @@ export default function UnitToken({ unit, selected, onSelect, onMove, svgRef, sn
 
   function handlePointerDown(e: React.PointerEvent) {
     e.stopPropagation();
-    onSelect(unit.id);
+    onSelect(terrain.id);
     const p = toBoardPoint(e.clientX, e.clientY);
-    dragOffset.current = { dx: p.x - unit.x, dy: p.y - unit.y };
+    dragOffset.current = { dx: p.x - terrain.x, dy: p.y - terrain.y };
     (e.target as Element).setPointerCapture(e.pointerId);
   }
 
@@ -38,7 +37,7 @@ export default function UnitToken({ unit, selected, onSelect, onMove, svgRef, sn
       x = Math.round(x / snapIn) * snapIn;
       y = Math.round(y / snapIn) * snapIn;
     }
-    onMove(unit.id, x, y);
+    onMove(terrain.id, x, y);
   }
 
   function handlePointerUp(e: React.PointerEvent) {
@@ -46,41 +45,52 @@ export default function UnitToken({ unit, selected, onSelect, onMove, svgRef, sn
     (e.target as Element).releasePointerCapture(e.pointerId);
   }
 
+  const shapeEl =
+    terrain.shape === 'circle' ? (
+      <circle
+        cx={0}
+        cy={0}
+        r={terrain.widthIn / 2}
+        fill={terrain.color}
+        fillOpacity={0.6}
+        stroke={selected ? '#ffffff' : '#000000'}
+        strokeWidth={selected ? 0.15 : 0.05}
+        strokeDasharray="0.4 0.3"
+      />
+    ) : (
+      <rect
+        x={-terrain.widthIn / 2}
+        y={-terrain.depthIn / 2}
+        width={terrain.widthIn}
+        height={terrain.depthIn}
+        fill={terrain.color}
+        fillOpacity={0.6}
+        stroke={selected ? '#ffffff' : '#000000'}
+        strokeWidth={selected ? 0.15 : 0.05}
+        strokeDasharray="0.4 0.3"
+      />
+    );
+
   return (
     <g
-      transform={`translate(${unit.x} ${unit.y}) rotate(${unit.facing})`}
+      transform={`translate(${terrain.x} ${terrain.y}) rotate(${terrain.rotation})`}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
       style={{ cursor: 'grab' }}
     >
-      <rect
-        x={-widthIn / 2}
-        y={-depthIn / 2}
-        width={widthIn}
-        height={depthIn}
-        fill={unit.color}
-        fillOpacity={0.55}
-        stroke={selected ? '#ffffff' : '#222222'}
-        strokeWidth={selected ? 0.12 : 0.05}
-      />
-      {/* facing arrow */}
-      <line x1={0} y1={0} x2={0} y2={-depthIn / 2} stroke="#ffffff" strokeWidth={0.08} />
-      <polygon
-        points={`0,${-depthIn / 2 - 0.4} -0.3,${-depthIn / 2 + 0.2} 0.3,${-depthIn / 2 + 0.2}`}
-        fill="#ffffff"
-      />
+      {shapeEl}
       <text
         x={0}
         y={0}
-        transform={`rotate(${-unit.facing})`}
+        transform={`rotate(${-terrain.rotation})`}
         textAnchor="middle"
         dominantBaseline="middle"
-        fontSize={Math.min(widthIn, depthIn) * 0.35}
-        fill="#000"
+        fontSize={Math.min(terrain.widthIn, terrain.depthIn || terrain.widthIn) * 0.25}
+        fill="#fff"
         style={{ pointerEvents: 'none', userSelect: 'none' }}
       >
-        {unit.name}
+        {terrain.name}
       </text>
     </g>
   );

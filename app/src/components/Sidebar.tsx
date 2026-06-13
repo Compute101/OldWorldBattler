@@ -1,26 +1,44 @@
-import type { Unit, BoardState } from '../types';
-import { FACTION_COLORS } from '../units';
+import type { BoardState, DeploymentZones, Selection, Terrain, Unit } from '../types';
+import { BOARD_PRESETS, FACTION_COLORS, TERRAIN_COLORS } from '../units';
 
 interface Props {
   board: BoardState;
-  selectedId: string | null;
-  onSelect: (id: string | null) => void;
+  selection: Selection | null;
+  onSelect: (selection: Selection | null) => void;
   onAddUnit: () => void;
   onUpdateUnit: (id: string, patch: Partial<Unit>) => void;
   onRemoveUnit: (id: string) => void;
+  onAddTerrain: () => void;
+  onUpdateTerrain: (id: string, patch: Partial<Terrain>) => void;
+  onRemoveTerrain: (id: string) => void;
   onUpdateBoard: (patch: Partial<BoardState>) => void;
 }
 
+const EDGES: DeploymentZones['edges'] = ['north', 'south', 'east', 'west'];
+
 export default function Sidebar({
   board,
-  selectedId,
+  selection,
   onSelect,
   onAddUnit,
   onUpdateUnit,
   onRemoveUnit,
+  onAddTerrain,
+  onUpdateTerrain,
+  onRemoveTerrain,
   onUpdateBoard,
 }: Props) {
-  const selected = board.units.find((u) => u.id === selectedId) ?? null;
+  const selectedUnit =
+    selection?.type === 'unit' ? board.units.find((u) => u.id === selection.id) ?? null : null;
+  const selectedTerrain =
+    selection?.type === 'terrain' ? board.terrain.find((t) => t.id === selection.id) ?? null : null;
+
+  function toggleEdge(edge: DeploymentZones['edges'][number]) {
+    const edges = board.deploymentZones.edges.includes(edge)
+      ? board.deploymentZones.edges.filter((e) => e !== edge)
+      : [...board.deploymentZones.edges, edge];
+    onUpdateBoard({ deploymentZones: { ...board.deploymentZones, edges } });
+  }
 
   return (
     <div className="sidebar">
@@ -29,21 +47,79 @@ export default function Sidebar({
       <section>
         <h3>Board</h3>
         <label>
-          Width (in)
+          Preset
+          <select
+            value=""
+            onChange={(e) => {
+              const preset = BOARD_PRESETS.find((p) => p.label === e.target.value);
+              if (preset) onUpdateBoard({ widthIn: preset.widthIn, heightIn: preset.heightIn });
+            }}
+          >
+            <option value="">Custom…</option>
+            {BOARD_PRESETS.map((p) => (
+              <option key={p.label} value={p.label}>
+                {p.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <div className="row">
+          <label>
+            Width (in)
+            <input
+              type="number"
+              value={board.widthIn}
+              onChange={(e) => onUpdateBoard({ widthIn: Number(e.target.value) })}
+            />
+          </label>
+          <label>
+            Height (in)
+            <input
+              type="number"
+              value={board.heightIn}
+              onChange={(e) => onUpdateBoard({ heightIn: Number(e.target.value) })}
+            />
+          </label>
+        </div>
+      </section>
+
+      <section>
+        <h3>Deployment Zones</h3>
+        <label className="checkbox-label">
           <input
-            type="number"
-            value={board.widthIn}
-            onChange={(e) => onUpdateBoard({ widthIn: Number(e.target.value) })}
+            type="checkbox"
+            checked={board.deploymentZones.enabled}
+            onChange={(e) =>
+              onUpdateBoard({ deploymentZones: { ...board.deploymentZones, enabled: e.target.checked } })
+            }
           />
+          Show deployment zones
         </label>
         <label>
-          Height (in)
+          Depth (in)
           <input
             type="number"
-            value={board.heightIn}
-            onChange={(e) => onUpdateBoard({ heightIn: Number(e.target.value) })}
+            min={1}
+            value={board.deploymentZones.depthIn}
+            onChange={(e) =>
+              onUpdateBoard({
+                deploymentZones: { ...board.deploymentZones, depthIn: Number(e.target.value) },
+              })
+            }
           />
         </label>
+        <div className="edge-checks">
+          {EDGES.map((edge) => (
+            <label key={edge} className="checkbox-label">
+              <input
+                type="checkbox"
+                checked={board.deploymentZones.edges.includes(edge)}
+                onChange={() => toggleEdge(edge)}
+              />
+              {edge}
+            </label>
+          ))}
+        </div>
       </section>
 
       <section>
@@ -53,8 +129,8 @@ export default function Sidebar({
           {board.units.map((u) => (
             <li
               key={u.id}
-              className={u.id === selectedId ? 'selected' : ''}
-              onClick={() => onSelect(u.id)}
+              className={selection?.type === 'unit' && selection.id === u.id ? 'selected' : ''}
+              onClick={() => onSelect({ type: 'unit', id: u.id })}
             >
               <span className="swatch" style={{ background: u.color }} />
               {u.name} ({u.faction})
@@ -63,30 +139,47 @@ export default function Sidebar({
         </ul>
       </section>
 
-      {selected && (
+      <section>
+        <h3>Terrain</h3>
+        <button onClick={onAddTerrain}>+ Add Terrain</button>
+        <ul className="unit-list">
+          {board.terrain.map((t) => (
+            <li
+              key={t.id}
+              className={selection?.type === 'terrain' && selection.id === t.id ? 'selected' : ''}
+              onClick={() => onSelect({ type: 'terrain', id: t.id })}
+            >
+              <span className="swatch" style={{ background: t.color }} />
+              {t.name} ({t.shape})
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      {selectedUnit && (
         <section className="unit-editor">
           <h3>Edit Unit</h3>
           <label>
             Name
             <input
               type="text"
-              value={selected.name}
-              onChange={(e) => onUpdateUnit(selected.id, { name: e.target.value })}
+              value={selectedUnit.name}
+              onChange={(e) => onUpdateUnit(selectedUnit.id, { name: e.target.value })}
             />
           </label>
           <label>
             Faction
             <input
               type="text"
-              value={selected.faction}
-              onChange={(e) => onUpdateUnit(selected.id, { faction: e.target.value })}
+              value={selectedUnit.faction}
+              onChange={(e) => onUpdateUnit(selectedUnit.id, { faction: e.target.value })}
             />
           </label>
           <label>
             Color
             <select
-              value={selected.color}
-              onChange={(e) => onUpdateUnit(selected.id, { color: e.target.value })}
+              value={selectedUnit.color}
+              onChange={(e) => onUpdateUnit(selectedUnit.id, { color: e.target.value })}
             >
               {FACTION_COLORS.map((c) => (
                 <option key={c} value={c} style={{ background: c }}>
@@ -100,16 +193,16 @@ export default function Sidebar({
               Base width (mm)
               <input
                 type="number"
-                value={selected.baseWidthMm}
-                onChange={(e) => onUpdateUnit(selected.id, { baseWidthMm: Number(e.target.value) })}
+                value={selectedUnit.baseWidthMm}
+                onChange={(e) => onUpdateUnit(selectedUnit.id, { baseWidthMm: Number(e.target.value) })}
               />
             </label>
             <label>
               Base depth (mm)
               <input
                 type="number"
-                value={selected.baseDepthMm}
-                onChange={(e) => onUpdateUnit(selected.id, { baseDepthMm: Number(e.target.value) })}
+                value={selectedUnit.baseDepthMm}
+                onChange={(e) => onUpdateUnit(selectedUnit.id, { baseDepthMm: Number(e.target.value) })}
               />
             </label>
           </div>
@@ -119,8 +212,10 @@ export default function Sidebar({
               <input
                 type="number"
                 min={1}
-                value={selected.files}
-                onChange={(e) => onUpdateUnit(selected.id, { files: Math.max(1, Number(e.target.value)) })}
+                value={selectedUnit.files}
+                onChange={(e) =>
+                  onUpdateUnit(selectedUnit.id, { files: Math.max(1, Number(e.target.value)) })
+                }
               />
             </label>
             <label>
@@ -128,8 +223,10 @@ export default function Sidebar({
               <input
                 type="number"
                 min={1}
-                value={selected.ranks}
-                onChange={(e) => onUpdateUnit(selected.id, { ranks: Math.max(1, Number(e.target.value)) })}
+                value={selectedUnit.ranks}
+                onChange={(e) =>
+                  onUpdateUnit(selectedUnit.id, { ranks: Math.max(1, Number(e.target.value)) })
+                }
               />
             </label>
           </div>
@@ -139,8 +236,8 @@ export default function Sidebar({
               <input
                 type="number"
                 step={0.5}
-                value={Number(selected.x.toFixed(2))}
-                onChange={(e) => onUpdateUnit(selected.id, { x: Number(e.target.value) })}
+                value={Number(selectedUnit.x.toFixed(2))}
+                onChange={(e) => onUpdateUnit(selectedUnit.id, { x: Number(e.target.value) })}
               />
             </label>
             <label>
@@ -148,8 +245,8 @@ export default function Sidebar({
               <input
                 type="number"
                 step={0.5}
-                value={Number(selected.y.toFixed(2))}
-                onChange={(e) => onUpdateUnit(selected.id, { y: Number(e.target.value) })}
+                value={Number(selectedUnit.y.toFixed(2))}
+                onChange={(e) => onUpdateUnit(selectedUnit.id, { y: Number(e.target.value) })}
               />
             </label>
           </div>
@@ -160,14 +257,18 @@ export default function Sidebar({
                 type="range"
                 min={0}
                 max={359}
-                value={selected.facing}
-                onChange={(e) => onUpdateUnit(selected.id, { facing: Number(e.target.value) })}
+                value={selectedUnit.facing}
+                onChange={(e) => onUpdateUnit(selectedUnit.id, { facing: Number(e.target.value) })}
               />
-              <span>{selected.facing}°</span>
-              <button onClick={() => onUpdateUnit(selected.id, { facing: (selected.facing + 315) % 360 })}>
+              <span>{selectedUnit.facing}°</span>
+              <button
+                onClick={() => onUpdateUnit(selectedUnit.id, { facing: (selectedUnit.facing + 315) % 360 })}
+              >
                 ↺ 45°
               </button>
-              <button onClick={() => onUpdateUnit(selected.id, { facing: (selected.facing + 45) % 360 })}>
+              <button
+                onClick={() => onUpdateUnit(selectedUnit.id, { facing: (selectedUnit.facing + 45) % 360 })}
+              >
                 ↻ 45°
               </button>
             </div>
@@ -175,12 +276,118 @@ export default function Sidebar({
           <label>
             Notes
             <textarea
-              value={selected.notes}
-              onChange={(e) => onUpdateUnit(selected.id, { notes: e.target.value })}
+              value={selectedUnit.notes}
+              onChange={(e) => onUpdateUnit(selectedUnit.id, { notes: e.target.value })}
             />
           </label>
-          <button className="danger" onClick={() => onRemoveUnit(selected.id)}>
+          <button className="danger" onClick={() => onRemoveUnit(selectedUnit.id)}>
             Remove Unit
+          </button>
+        </section>
+      )}
+
+      {selectedTerrain && (
+        <section className="unit-editor">
+          <h3>Edit Terrain</h3>
+          <label>
+            Name
+            <input
+              type="text"
+              value={selectedTerrain.name}
+              onChange={(e) => onUpdateTerrain(selectedTerrain.id, { name: e.target.value })}
+            />
+          </label>
+          <label>
+            Shape
+            <select
+              value={selectedTerrain.shape}
+              onChange={(e) => onUpdateTerrain(selectedTerrain.id, { shape: e.target.value as Terrain['shape'] })}
+            >
+              <option value="rect">Rectangle</option>
+              <option value="circle">Circle</option>
+            </select>
+          </label>
+          <label>
+            Color
+            <select
+              value={selectedTerrain.color}
+              onChange={(e) => onUpdateTerrain(selectedTerrain.id, { color: e.target.value })}
+            >
+              {TERRAIN_COLORS.map((c) => (
+                <option key={c} value={c} style={{ background: c }}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          </label>
+          <div className="row">
+            <label>
+              {selectedTerrain.shape === 'circle' ? 'Diameter (in)' : 'Width (in)'}
+              <input
+                type="number"
+                step={0.5}
+                min={0.5}
+                value={selectedTerrain.widthIn}
+                onChange={(e) => onUpdateTerrain(selectedTerrain.id, { widthIn: Number(e.target.value) })}
+              />
+            </label>
+            {selectedTerrain.shape === 'rect' && (
+              <label>
+                Depth (in)
+                <input
+                  type="number"
+                  step={0.5}
+                  min={0.5}
+                  value={selectedTerrain.depthIn}
+                  onChange={(e) => onUpdateTerrain(selectedTerrain.id, { depthIn: Number(e.target.value) })}
+                />
+              </label>
+            )}
+          </div>
+          <div className="row">
+            <label>
+              X (in)
+              <input
+                type="number"
+                step={0.5}
+                value={Number(selectedTerrain.x.toFixed(2))}
+                onChange={(e) => onUpdateTerrain(selectedTerrain.id, { x: Number(e.target.value) })}
+              />
+            </label>
+            <label>
+              Y (in)
+              <input
+                type="number"
+                step={0.5}
+                value={Number(selectedTerrain.y.toFixed(2))}
+                onChange={(e) => onUpdateTerrain(selectedTerrain.id, { y: Number(e.target.value) })}
+              />
+            </label>
+          </div>
+          {selectedTerrain.shape === 'rect' && (
+            <label>
+              Rotation
+              <div className="facing-controls">
+                <input
+                  type="range"
+                  min={0}
+                  max={359}
+                  value={selectedTerrain.rotation}
+                  onChange={(e) => onUpdateTerrain(selectedTerrain.id, { rotation: Number(e.target.value) })}
+                />
+                <span>{selectedTerrain.rotation}°</span>
+              </div>
+            </label>
+          )}
+          <label>
+            Notes
+            <textarea
+              value={selectedTerrain.notes}
+              onChange={(e) => onUpdateTerrain(selectedTerrain.id, { notes: e.target.value })}
+            />
+          </label>
+          <button className="danger" onClick={() => onRemoveTerrain(selectedTerrain.id)}>
+            Remove Terrain
           </button>
         </section>
       )}
