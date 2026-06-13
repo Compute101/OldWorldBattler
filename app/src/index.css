@@ -1,0 +1,23 @@
+:root {
+  font: 16px/1.4 system-ui, 'Segoe UI', Roboto, sans-serif;
+  color-scheme: dark;
+  color: #e8e8e8;
+  background: #1e1e1e;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+#root {
+  width: 100%;
+  min-height: 100svh;
+}
+
+input, select, textarea, button {
+  font: inherit;
+}
