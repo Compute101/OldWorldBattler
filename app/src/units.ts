@@ -122,10 +122,17 @@ export function defaultBoardState(): BoardState {
   };
 }
 
+// A unit deeper than it is wide (more ranks than files) is in Marching Column,
+// which lets it triple (rather than double) its Movement when marching.
+export function isMarchingColumn(unit: Unit): boolean {
+  return unit.ranks > unit.files;
+}
+
 // Remaining movement allowance for a unit this turn, in inches.
 export function remainingMoveIn(unit: Unit, moveUsedIn: number, unlocked: boolean): number {
   if (unlocked) return Infinity;
-  const allowance = unit.movementIn * (unit.marching ? 2 : 1);
+  const marchMultiplier = isMarchingColumn(unit) ? 3 : 2;
+  const allowance = unit.movementIn * (unit.marching ? marchMultiplier : 1);
   return Math.max(0, allowance - moveUsedIn);
 }
 

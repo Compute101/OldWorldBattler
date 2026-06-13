@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { BoardState, DeploymentZones, Selection, Terrain, Unit } from '../types';
-import { BOARD_PRESETS, FACTION_COLORS, TERRAIN_COLORS, remainingMoveIn } from '../units';
+import { BOARD_PRESETS, FACTION_COLORS, TERRAIN_COLORS, isMarchingColumn, remainingMoveIn } from '../units';
 
 interface Props {
   board: BoardState;
@@ -361,7 +361,8 @@ export default function Sidebar({
                 checked={selectedUnit.marching}
                 onChange={(e) => onUpdateUnit(selectedUnit.id, { marching: e.target.checked })}
               />
-              Marching (x2)
+              Marching (x{isMarchingColumn(selectedUnit) ? 3 : 2}
+              {isMarchingColumn(selectedUnit) ? ' - column' : ''})
             </label>
           </div>
           {board.phase === 'battle' && (
