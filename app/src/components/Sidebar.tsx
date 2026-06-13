@@ -12,6 +12,8 @@ interface Props {
   onUpdateTerrain: (id: string, patch: Partial<Terrain>) => void;
   onRemoveTerrain: (id: string) => void;
   onUpdateBoard: (patch: Partial<BoardState>) => void;
+  open: boolean;
+  onClose: () => void;
 }
 
 const EDGES: DeploymentZones['edges'] = ['north', 'south', 'east', 'west'];
@@ -27,6 +29,8 @@ export default function Sidebar({
   onUpdateTerrain,
   onRemoveTerrain,
   onUpdateBoard,
+  open,
+  onClose,
 }: Props) {
   const selectedUnit =
     selection?.type === 'unit' ? board.units.find((u) => u.id === selection.id) ?? null : null;
@@ -41,8 +45,13 @@ export default function Sidebar({
   }
 
   return (
-    <div className="sidebar">
-      <h2>Old World Battler</h2>
+    <div className={`sidebar ${open ? 'open' : ''}`}>
+      <div className="sidebar-header">
+        <h2>Old World Battler</h2>
+        <button className="sidebar-close" onClick={onClose}>
+          ✕
+        </button>
+      </div>
 
       <section>
         <h3>Board</h3>
