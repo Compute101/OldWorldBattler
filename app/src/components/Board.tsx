@@ -52,6 +52,10 @@ export default function Board({
   } | null>(null);
   const [measure, setMeasure] = useState<{ x1: number; y1: number; x2: number; y2: number } | null>(null);
   const measuring = useRef(false);
+  const pointers = useRef<Map<number, { x: number; y: number }>>(new Map());
+  const pinch = useRef<{ initialDist: number; initialView: View; boardCenter: { x: number; y: number } } | null>(
+    null,
+  );
 
   function resetView() {
     setView({ x: 0, y: 0, w: widthIn, h: heightIn });
@@ -79,12 +83,26 @@ export default function Board({
   function handlePointerDown(e: React.PointerEvent<SVGSVGElement>) {
     const svg = svgRef.current;
     if (!svg) return;
+    svg.setPointerCapture(e.pointerId);
+    pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    if (pointers.current.size === 2) {
+      // second finger down: start a pinch-zoom, cancel any pan/measure in progress
+      panState.current = null;
+      measuring.current = false;
+      const [a, b] = Array.from(pointers.current.values());
+      const dist = Math.hypot(a.x - b.x, a.y - b.y);
+      const boardCenter = screenToBoardPoint(svg, (a.x + b.x) / 2, (a.y + b.y) / 2);
+      pinch.current = { initialDist: dist, initialView: view, boardCenter };
+      return;
+    }
+    if (pointers.current.size > 2) return;
+
     const p = screenToBoardPoint(svg, e.clientX, e.clientY);
 
     if (mode === 'measure') {
       measuring.current = true;
       setMeasure({ x1: p.x, y1: p.y, x2: p.x, y2: p.y });
-      svg.setPointerCapture(e.pointerId);
       return;
     }
 
@@ -96,12 +114,32 @@ export default function Board({
       rectW: rect.width,
       panned: false,
     };
-    svg.setPointerCapture(e.pointerId);
   }
 
   function handlePointerMove(e: React.PointerEvent<SVGSVGElement>) {
     const svg = svgRef.current;
     if (!svg) return;
+
+    if (pointers.current.has(e.pointerId)) {
+      pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    }
+
+    if (pointers.current.size === 2 && pinch.current) {
+      const [a, b] = Array.from(pointers.current.values());
+      const dist = Math.hypot(a.x - b.x, a.y - b.y);
+      const { initialDist, initialView, boardCenter } = pinch.current;
+      const factor = dist / initialDist;
+      const newW = clamp(initialView.w / factor, widthIn / 8, widthIn * 2);
+      const scale = newW / initialView.w;
+      const newH = initialView.h * scale;
+      setView({
+        x: boardCenter.x - (boardCenter.x - initialView.x) * scale,
+        y: boardCenter.y - (boardCenter.y - initialView.y) * scale,
+        w: newW,
+        h: newH,
+      });
+      return;
+    }
 
     if (mode === 'measure' && measuring.current) {
       const p = screenToBoardPoint(svg, e.clientX, e.clientY);
@@ -127,6 +165,10 @@ export default function Board({
   function handlePointerUp(e: React.PointerEvent<SVGSVGElement>) {
     const svg = svgRef.current;
     if (svg) svg.releasePointerCapture(e.pointerId);
+    pointers.current.delete(e.pointerId);
+    if (pointers.current.size < 2) {
+      pinch.current = null;
+    }
     measuring.current = false;
     if (panState.current && !panState.current.panned) {
       onSelect(null);
@@ -217,6 +259,7 @@ export default function Board({
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
         style={{ cursor: mode === 'measure' ? 'crosshair' : 'grab' }}
       >
         <rect x={0} y={0} width={widthIn} height={heightIn} fill="#3a5f3a" />
