@@ -1,8 +1,15 @@
+export type ColorScheme = 'solid' | 'vertical' | 'horizontal' | 'diagonal';
+
+export type UnitType = 'infantry' | 'cavalry' | 'chariot' | 'monster' | 'warMachine' | 'character';
+
 export interface Unit {
   id: string;
   name: string;
   faction: string;
-  color: string;
+  colorMajor: string;
+  colorMinor: string;
+  colorScheme: ColorScheme;
+  unitType: UnitType;
   baseWidthMm: number;
   baseDepthMm: number;
   ranks: number;

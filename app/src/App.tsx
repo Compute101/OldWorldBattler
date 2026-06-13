@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import Board from './components/Board';
 import Sidebar from './components/Sidebar';
 import Toolbar from './components/Toolbar';
-import { FACTION_COLORS, angleDiff, defaultBoardState, defaultTerrain, defaultUnit, makeId, snapshotUnits } from './units';
+import { FACTION_COLORS, angleDiff, defaultBoardState, defaultTerrain, defaultUnit, makeId, normalizeUnit, snapshotUnits } from './units';
 import type { BoardState, LogEntry, Mode, Selection, Terrain, Unit } from './types';
 import './App.css';
 
@@ -13,7 +13,8 @@ function loadBoard(): BoardState {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw) as Partial<BoardState>;
-      return { ...defaultBoardState(), ...parsed };
+      const board = { ...defaultBoardState(), ...parsed };
+      return { ...board, units: (board.units ?? []).map(normalizeUnit) };
     }
   } catch {
     // ignore invalid stored state
@@ -89,7 +90,8 @@ function App() {
   }
 
   function handleImport(data: BoardState) {
-    setBoard({ ...defaultBoardState(), ...data });
+    const board = { ...defaultBoardState(), ...data };
+    setBoard({ ...board, units: (board.units ?? []).map(normalizeUnit) });
     setSelection(null);
   }
 

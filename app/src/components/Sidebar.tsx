@@ -1,7 +1,20 @@
 import { useState } from 'react';
-import type { BoardState, DeploymentZones, Selection, Terrain, Unit } from '../types';
-import { BOARD_PRESETS, FACTION_COLORS, TERRAIN_COLORS, isMarchingColumn, remainingMoveIn } from '../units';
+import type { BoardState, ColorScheme, DeploymentZones, Selection, Terrain, Unit, UnitType } from '../types';
+import { BOARD_PRESETS, COLOR_SCHEMES, FACTION_COLORS, TERRAIN_COLORS, UNIT_TYPES, isMarchingColumn, remainingMoveIn } from '../units';
 import NumberField from './NumberField';
+
+function swatchBackground(major: string, minor: string, scheme: ColorScheme): string {
+  switch (scheme) {
+    case 'vertical':
+      return `linear-gradient(to right, ${major} 50%, ${minor} 50%)`;
+    case 'horizontal':
+      return `linear-gradient(to bottom, ${major} 50%, ${minor} 50%)`;
+    case 'diagonal':
+      return `linear-gradient(to bottom right, ${major} 50%, ${minor} 50%)`;
+    default:
+      return major;
+  }
+}
 
 interface Props {
   board: BoardState;
@@ -232,7 +245,7 @@ export default function Sidebar({
               className={selection?.type === 'unit' && selection.id === u.id ? 'selected' : ''}
               onClick={() => onSelect({ type: 'unit', id: u.id })}
             >
-              <span className="swatch" style={{ background: u.color }} />
+              <span className="swatch" style={{ background: swatchBackground(u.colorMajor, u.colorMinor, u.colorScheme) }} />
               {u.name} ({u.faction})
             </li>
           ))}
@@ -275,19 +288,62 @@ export default function Sidebar({
               onChange={(e) => onUpdateUnit(selectedUnit.id, { faction: e.target.value })}
             />
           </label>
-          <label>
-            Color
-            <select
-              value={selectedUnit.color}
-              onChange={(e) => onUpdateUnit(selectedUnit.id, { color: e.target.value })}
-            >
-              {FACTION_COLORS.map((c) => (
-                <option key={c} value={c} style={{ background: c }}>
-                  {c}
-                </option>
-              ))}
-            </select>
-          </label>
+          <div className="row">
+            <label>
+              Major Color
+              <select
+                value={selectedUnit.colorMajor}
+                onChange={(e) => onUpdateUnit(selectedUnit.id, { colorMajor: e.target.value })}
+              >
+                {FACTION_COLORS.map((c) => (
+                  <option key={c} value={c} style={{ background: c }}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Minor Color
+              <select
+                value={selectedUnit.colorMinor}
+                onChange={(e) => onUpdateUnit(selectedUnit.id, { colorMinor: e.target.value })}
+              >
+                {FACTION_COLORS.map((c) => (
+                  <option key={c} value={c} style={{ background: c }}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+          <div className="row">
+            <label>
+              Pattern
+              <select
+                value={selectedUnit.colorScheme}
+                onChange={(e) => onUpdateUnit(selectedUnit.id, { colorScheme: e.target.value as ColorScheme })}
+              >
+                {COLOR_SCHEMES.map((s) => (
+                  <option key={s.value} value={s.value}>
+                    {s.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Unit Type
+              <select
+                value={selectedUnit.unitType}
+                onChange={(e) => onUpdateUnit(selectedUnit.id, { unitType: e.target.value as UnitType })}
+              >
+                {UNIT_TYPES.map((t) => (
+                  <option key={t.value} value={t.value}>
+                    {t.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
           <div className="row">
             <label>
               Base width (mm)
