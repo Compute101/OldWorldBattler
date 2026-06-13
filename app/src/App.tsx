@@ -142,7 +142,7 @@ function App() {
         <Board
           board={board}
           selection={selection}
-          onSelect={handleSelect}
+          onSelect={setSelection}
           onMoveUnit={handleMoveUnit}
           onMoveTerrain={handleMoveTerrain}
           snapIn={snapIn}
