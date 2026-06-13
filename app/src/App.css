@@ -85,6 +85,47 @@
   resize: vertical;
 }
 
+.number-field {
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.number-field input {
+  margin-top: 0;
+  text-align: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.number-field input::-webkit-outer-spin-button,
+.number-field input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.number-field input[type='number'] {
+  -moz-appearance: textfield;
+}
+
+.number-field button {
+  flex-shrink: 0;
+  width: 28px;
+  padding: 0;
+  background: #2e303a;
+  border: 1px solid #3a3d4a;
+  border-radius: 4px;
+  color: #e8e8e8;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.number-field button:hover {
+  background: #3a3d4a;
+}
+
 .sidebar .row {
   display: flex;
   gap: 8px;

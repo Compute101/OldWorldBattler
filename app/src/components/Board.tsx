@@ -17,6 +17,7 @@ interface Props {
   onSelect: (selection: Selection | null) => void;
   onUpdateUnit: (id: string, patch: Partial<Unit>, costIn?: number) => void;
   onMoveTerrain: (id: string, x: number, y: number) => void;
+  onRotateTerrain: (id: string, rotation: number) => void;
   snapIn: number;
   mode: Mode;
 }
@@ -31,6 +32,7 @@ export default function Board({
   onSelect,
   onUpdateUnit,
   onMoveTerrain,
+  onRotateTerrain,
   snapIn,
   mode,
 }: Props) {
@@ -272,6 +274,7 @@ export default function Board({
             selected={selection?.type === 'terrain' && selection.id === t.id}
             onSelect={(id) => onSelect({ type: 'terrain', id })}
             onMove={onMoveTerrain}
+            onRotate={onRotateTerrain}
             svgRef={svgRef}
             snapIn={snapIn}
             locked={board.phase === 'battle'}

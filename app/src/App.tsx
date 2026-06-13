@@ -74,6 +74,11 @@ function App() {
     handleUpdateTerrain(id, { x, y });
   }
 
+  function handleRotateTerrain(id: string, rotation: number) {
+    if (board.phase === 'battle') return;
+    handleUpdateTerrain(id, { rotation });
+  }
+
   function handleRemoveTerrain(id: string) {
     setBoard((b) => ({ ...b, terrain: b.terrain.filter((t) => t.id !== id) }));
     setSelection(null);
@@ -214,6 +219,7 @@ function App() {
           onSelect={setSelection}
           onUpdateUnit={handleUpdateUnit}
           onMoveTerrain={handleMoveTerrain}
+          onRotateTerrain={handleRotateTerrain}
           snapIn={snapIn}
           mode={mode}
         />

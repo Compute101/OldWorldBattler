@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { BoardState, DeploymentZones, Selection, Terrain, Unit } from '../types';
 import { BOARD_PRESETS, FACTION_COLORS, TERRAIN_COLORS, isMarchingColumn, remainingMoveIn } from '../units';
+import NumberField from './NumberField';
 
 interface Props {
   board: BoardState;
@@ -178,19 +179,11 @@ export default function Sidebar({
         <div className="row">
           <label>
             Width (in)
-            <input
-              type="number"
-              value={board.widthIn}
-              onChange={(e) => onUpdateBoard({ widthIn: Number(e.target.value) })}
-            />
+            <NumberField value={board.widthIn} min={1} onChange={(n) => onUpdateBoard({ widthIn: n })} />
           </label>
           <label>
             Height (in)
-            <input
-              type="number"
-              value={board.heightIn}
-              onChange={(e) => onUpdateBoard({ heightIn: Number(e.target.value) })}
-            />
+            <NumberField value={board.heightIn} min={1} onChange={(n) => onUpdateBoard({ heightIn: n })} />
           </label>
         </div>
       </section>
@@ -209,15 +202,10 @@ export default function Sidebar({
         </label>
         <label>
           Depth (in)
-          <input
-            type="number"
-            min={1}
+          <NumberField
             value={board.deploymentZones.depthIn}
-            onChange={(e) =>
-              onUpdateBoard({
-                deploymentZones: { ...board.deploymentZones, depthIn: Number(e.target.value) },
-              })
-            }
+            min={1}
+            onChange={(n) => onUpdateBoard({ deploymentZones: { ...board.deploymentZones, depthIn: n } })}
           />
         </label>
         <div className="edge-checks">
@@ -303,56 +291,47 @@ export default function Sidebar({
           <div className="row">
             <label>
               Base width (mm)
-              <input
-                type="number"
+              <NumberField
                 value={selectedUnit.baseWidthMm}
-                onChange={(e) => onUpdateUnit(selectedUnit.id, { baseWidthMm: Number(e.target.value) })}
+                min={1}
+                onChange={(n) => onUpdateUnit(selectedUnit.id, { baseWidthMm: n })}
               />
             </label>
             <label>
               Base depth (mm)
-              <input
-                type="number"
+              <NumberField
                 value={selectedUnit.baseDepthMm}
-                onChange={(e) => onUpdateUnit(selectedUnit.id, { baseDepthMm: Number(e.target.value) })}
+                min={1}
+                onChange={(n) => onUpdateUnit(selectedUnit.id, { baseDepthMm: n })}
               />
             </label>
           </div>
           <div className="row">
             <label>
               Files (width)
-              <input
-                type="number"
-                min={1}
+              <NumberField
                 value={selectedUnit.files}
-                onChange={(e) =>
-                  onUpdateUnit(selectedUnit.id, { files: Math.max(1, Number(e.target.value)) })
-                }
+                min={1}
+                onChange={(n) => onUpdateUnit(selectedUnit.id, { files: n })}
               />
             </label>
             <label>
               Ranks (depth)
-              <input
-                type="number"
-                min={1}
+              <NumberField
                 value={selectedUnit.ranks}
-                onChange={(e) =>
-                  onUpdateUnit(selectedUnit.id, { ranks: Math.max(1, Number(e.target.value)) })
-                }
+                min={1}
+                onChange={(n) => onUpdateUnit(selectedUnit.id, { ranks: n })}
               />
             </label>
           </div>
           <div className="row">
             <label>
               Movement (M, in)
-              <input
-                type="number"
+              <NumberField
+                value={selectedUnit.movementIn}
                 min={0}
                 step={0.5}
-                value={selectedUnit.movementIn}
-                onChange={(e) =>
-                  onUpdateUnit(selectedUnit.id, { movementIn: Math.max(0, Number(e.target.value)) })
-                }
+                onChange={(n) => onUpdateUnit(selectedUnit.id, { movementIn: n })}
               />
             </label>
             <label className="checkbox-label">
@@ -385,20 +364,18 @@ export default function Sidebar({
           <div className="row">
             <label>
               X (in)
-              <input
-                type="number"
-                step={0.5}
+              <NumberField
                 value={Number(selectedUnit.x.toFixed(2))}
-                onChange={(e) => onUpdateUnit(selectedUnit.id, { x: Number(e.target.value) })}
+                step={0.5}
+                onChange={(n) => onUpdateUnit(selectedUnit.id, { x: n })}
               />
             </label>
             <label>
               Y (in)
-              <input
-                type="number"
-                step={0.5}
+              <NumberField
                 value={Number(selectedUnit.y.toFixed(2))}
-                onChange={(e) => onUpdateUnit(selectedUnit.id, { y: Number(e.target.value) })}
+                step={0.5}
+                onChange={(n) => onUpdateUnit(selectedUnit.id, { y: n })}
               />
             </label>
           </div>
@@ -475,23 +452,21 @@ export default function Sidebar({
           <div className="row">
             <label>
               {selectedTerrain.shape === 'circle' ? 'Diameter (in)' : 'Width (in)'}
-              <input
-                type="number"
+              <NumberField
+                value={selectedTerrain.widthIn}
                 step={0.5}
                 min={0.5}
-                value={selectedTerrain.widthIn}
-                onChange={(e) => onUpdateTerrain(selectedTerrain.id, { widthIn: Number(e.target.value) })}
+                onChange={(n) => onUpdateTerrain(selectedTerrain.id, { widthIn: n })}
               />
             </label>
             {selectedTerrain.shape === 'rect' && (
               <label>
                 Depth (in)
-                <input
-                  type="number"
+                <NumberField
+                  value={selectedTerrain.depthIn}
                   step={0.5}
                   min={0.5}
-                  value={selectedTerrain.depthIn}
-                  onChange={(e) => onUpdateTerrain(selectedTerrain.id, { depthIn: Number(e.target.value) })}
+                  onChange={(n) => onUpdateTerrain(selectedTerrain.id, { depthIn: n })}
                 />
               </label>
             )}
@@ -499,20 +474,18 @@ export default function Sidebar({
           <div className="row">
             <label>
               X (in)
-              <input
-                type="number"
-                step={0.5}
+              <NumberField
                 value={Number(selectedTerrain.x.toFixed(2))}
-                onChange={(e) => onUpdateTerrain(selectedTerrain.id, { x: Number(e.target.value) })}
+                step={0.5}
+                onChange={(n) => onUpdateTerrain(selectedTerrain.id, { x: n })}
               />
             </label>
             <label>
               Y (in)
-              <input
-                type="number"
-                step={0.5}
+              <NumberField
                 value={Number(selectedTerrain.y.toFixed(2))}
-                onChange={(e) => onUpdateTerrain(selectedTerrain.id, { y: Number(e.target.value) })}
+                step={0.5}
+                onChange={(n) => onUpdateTerrain(selectedTerrain.id, { y: n })}
               />
             </label>
           </div>
