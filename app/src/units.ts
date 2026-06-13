@@ -1,4 +1,4 @@
-import type { BoardState, Terrain, Unit } from './types';
+import type { BoardState, Terrain, Unit, UnitTransform } from './types';
 
 export const MM_PER_INCH = 25.4;
 
@@ -111,5 +111,22 @@ export function defaultBoardState(): BoardState {
       depthIn: 12,
       edges: ['north', 'south'],
     },
+    phase: 'setup',
+    turn: 1,
+    turnStart: {},
+    log: [],
   };
+}
+
+export function snapshotUnits(units: Unit[]): Record<string, UnitTransform> {
+  const snapshot: Record<string, UnitTransform> = {};
+  for (const u of units) {
+    snapshot[u.id] = { x: u.x, y: u.y, facing: u.facing };
+  }
+  return snapshot;
+}
+
+// Smallest signed difference (degrees) to rotate `from` into `to`, in range [-180, 180].
+export function angleDiff(from: number, to: number): number {
+  return normalizeAngle(to - from + 180) - 180;
 }

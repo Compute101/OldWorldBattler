@@ -34,12 +34,34 @@ export interface DeploymentZones {
   edges: ('north' | 'south' | 'east' | 'west')[];
 }
 
+export type Phase = 'setup' | 'battle';
+
+export interface UnitTransform {
+  x: number;
+  y: number;
+  facing: number;
+}
+
+export interface LogEntry {
+  id: string;
+  turn: number;
+  unitId: string | null;
+  unitName: string;
+  distanceIn: number;
+  facingChange: number;
+  note: string;
+}
+
 export interface BoardState {
   widthIn: number;
   heightIn: number;
   units: Unit[];
   terrain: Terrain[];
   deploymentZones: DeploymentZones;
+  phase: Phase;
+  turn: number;
+  turnStart: Record<string, UnitTransform>;
+  log: LogEntry[];
 }
 
 export type Selection = { type: 'unit' | 'terrain'; id: string };

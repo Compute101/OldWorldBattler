@@ -274,6 +274,7 @@ export default function Board({
             onMove={onMoveTerrain}
             svgRef={svgRef}
             snapIn={snapIn}
+            locked={board.phase === 'battle'}
           />
         ))}
         {units.map((unit) => (

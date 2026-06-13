@@ -9,9 +9,10 @@ interface Props {
   onMove: (id: string, x: number, y: number) => void;
   svgRef: React.RefObject<SVGSVGElement | null>;
   snapIn: number;
+  locked: boolean;
 }
 
-export default function TerrainToken({ terrain, selected, onSelect, onMove, svgRef, snapIn }: Props) {
+export default function TerrainToken({ terrain, selected, onSelect, onMove, svgRef, snapIn, locked }: Props) {
   const dragOffset = useRef<{ dx: number; dy: number } | null>(null);
 
   function toBoardPoint(clientX: number, clientY: number) {
@@ -23,6 +24,7 @@ export default function TerrainToken({ terrain, selected, onSelect, onMove, svgR
   function handlePointerDown(e: React.PointerEvent) {
     e.stopPropagation();
     onSelect(terrain.id);
+    if (locked) return;
     const p = toBoardPoint(e.clientX, e.clientY);
     dragOffset.current = { dx: p.x - terrain.x, dy: p.y - terrain.y };
     (e.target as Element).setPointerCapture(e.pointerId);
@@ -77,7 +79,7 @@ export default function TerrainToken({ terrain, selected, onSelect, onMove, svgR
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
-      style={{ cursor: 'grab' }}
+      style={{ cursor: locked ? 'default' : 'grab' }}
     >
       {shapeEl}
       <text
