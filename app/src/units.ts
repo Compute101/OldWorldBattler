@@ -36,6 +36,8 @@ export function defaultUnit(faction: string, color: string): Unit {
     x: 24,
     y: 24,
     facing: 0,
+    movementIn: 4,
+    marching: false,
     notes: '',
   };
 }
@@ -114,8 +116,17 @@ export function defaultBoardState(): BoardState {
     phase: 'setup',
     turn: 1,
     turnStart: {},
+    moveUsed: {},
+    movementUnlocked: false,
     log: [],
   };
+}
+
+// Remaining movement allowance for a unit this turn, in inches.
+export function remainingMoveIn(unit: Unit, moveUsedIn: number, unlocked: boolean): number {
+  if (unlocked) return Infinity;
+  const allowance = unit.movementIn * (unit.marching ? 2 : 1);
+  return Math.max(0, allowance - moveUsedIn);
 }
 
 export function snapshotUnits(units: Unit[]): Record<string, UnitTransform> {

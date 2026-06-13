@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { BoardState, DeploymentZones, Selection, Terrain, Unit } from '../types';
-import { BOARD_PRESETS, FACTION_COLORS, TERRAIN_COLORS } from '../units';
+import { BOARD_PRESETS, FACTION_COLORS, TERRAIN_COLORS, remainingMoveIn } from '../units';
 
 interface Props {
   board: BoardState;
@@ -93,6 +93,16 @@ export default function Sidebar({
             <button onClick={onEndTurn}>End Turn</button>
             <button onClick={onBackToSetup}>Back to Setup</button>
           </div>
+        )}
+        {board.phase === 'battle' && (
+          <label className="checkbox-label">
+            <input
+              type="checkbox"
+              checked={board.movementUnlocked}
+              onChange={(e) => onUpdateBoard({ movementUnlocked: e.target.checked })}
+            />
+            Unlock movement (ignore Movement limits)
+          </label>
         )}
         {board.phase === 'battle' && (
           <>
@@ -332,6 +342,45 @@ export default function Sidebar({
               />
             </label>
           </div>
+          <div className="row">
+            <label>
+              Movement (M, in)
+              <input
+                type="number"
+                min={0}
+                step={0.5}
+                value={selectedUnit.movementIn}
+                onChange={(e) =>
+                  onUpdateUnit(selectedUnit.id, { movementIn: Math.max(0, Number(e.target.value)) })
+                }
+              />
+            </label>
+            <label className="checkbox-label">
+              <input
+                type="checkbox"
+                checked={selectedUnit.marching}
+                onChange={(e) => onUpdateUnit(selectedUnit.id, { marching: e.target.checked })}
+              />
+              Marching (x2)
+            </label>
+          </div>
+          {board.phase === 'battle' && (
+            <div className="row">
+              <span>
+                Movement remaining:{' '}
+                <strong>
+                  {(() => {
+                    const remaining = remainingMoveIn(
+                      selectedUnit,
+                      board.moveUsed[selectedUnit.id] ?? 0,
+                      board.movementUnlocked,
+                    );
+                    return Number.isFinite(remaining) ? `${remaining.toFixed(1)}"` : 'Unlocked';
+                  })()}
+                </strong>
+              </span>
+            </div>
+          )}
           <div className="row">
             <label>
               X (in)

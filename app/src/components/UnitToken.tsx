@@ -1,22 +1,25 @@
 import { useRef } from 'react';
-import type { Unit } from '../types';
+import type { Phase, Unit } from '../types';
 import { footprintInches, localToBoard, normalizeAngle, rotateVec, screenToBoardPoint } from '../units';
 
 interface Props {
   unit: Unit;
   selected: boolean;
   onSelect: (id: string) => void;
-  onUpdate: (id: string, patch: Partial<Unit>) => void;
+  onUpdate: (id: string, patch: Partial<Unit>, costIn?: number) => void;
   svgRef: React.RefObject<SVGSVGElement | null>;
   snapIn: number;
+  phase: Phase;
+  remainingIn: number;
 }
 
 type WheelCorner = 'fl' | 'fr';
 
-export default function UnitToken({ unit, selected, onSelect, onUpdate, svgRef, snapIn }: Props) {
+export default function UnitToken({ unit, selected, onSelect, onUpdate, svgRef, snapIn, phase, remainingIn }: Props) {
   const { widthIn, depthIn } = footprintInches(unit);
   const dragOffset = useRef<{ dx: number; dy: number } | null>(null);
   const rotating = useRef(false);
+  const reformCharged = useRef(false);
   const wheeling = useRef<{
     pivot: { x: number; y: number };
     pivotLocal: { x: number; y: number };
@@ -49,6 +52,18 @@ export default function UnitToken({ unit, selected, onSelect, onUpdate, svgRef, 
       x = Math.round(x / snapIn) * snapIn;
       y = Math.round(y / snapIn) * snapIn;
     }
+    if (phase === 'battle') {
+      const dist = Math.hypot(x - unit.x, y - unit.y);
+      if (dist <= 0) return;
+      if (remainingIn <= 0) return;
+      if (dist > remainingIn) {
+        const scale = remainingIn / dist;
+        x = unit.x + (x - unit.x) * scale;
+        y = unit.y + (y - unit.y) * scale;
+      }
+      onUpdate(unit.id, { x, y }, Math.hypot(x - unit.x, y - unit.y));
+      return;
+    }
     onUpdate(unit.id, { x, y });
   }
 
@@ -61,6 +76,7 @@ export default function UnitToken({ unit, selected, onSelect, onUpdate, svgRef, 
     e.stopPropagation();
     onSelect(unit.id);
     rotating.current = true;
+    reformCharged.current = false;
     (e.target as Element).setPointerCapture(e.pointerId);
   }
 
@@ -70,6 +86,16 @@ export default function UnitToken({ unit, selected, onSelect, onUpdate, svgRef, 
     const dx = p.x - unit.x;
     const dy = p.y - unit.y;
     const facing = normalizeAngle((Math.atan2(dx, -dy) * 180) / Math.PI);
+    if (phase === 'battle') {
+      if (!reformCharged.current) {
+        if (remainingIn <= 0) return;
+        reformCharged.current = true;
+        onUpdate(unit.id, { facing: Math.round(facing) }, remainingIn);
+        return;
+      }
+      onUpdate(unit.id, { facing: Math.round(facing) });
+      return;
+    }
     onUpdate(unit.id, { facing: Math.round(facing) });
   }
 
@@ -93,11 +119,22 @@ export default function UnitToken({ unit, selected, onSelect, onUpdate, svgRef, 
     const angle = (Math.atan2(p.y - pivot.y, p.x - pivot.x) * 180) / Math.PI;
     const facing = normalizeAngle(corner === 'fl' ? angle - 180 : angle);
     const offset = rotateVec(pivotLocal.x, pivotLocal.y, facing);
-    onUpdate(unit.id, {
-      facing: Math.round(facing),
-      x: Math.round((pivot.x - offset.x) * 100) / 100,
-      y: Math.round((pivot.y - offset.y) * 100) / 100,
-    });
+    const x = Math.round((pivot.x - offset.x) * 100) / 100;
+    const y = Math.round((pivot.y - offset.y) * 100) / 100;
+
+    if (phase === 'battle') {
+      if (remainingIn <= 0) return;
+      // the outside corner sweeps the furthest, so its arc length is the move cost
+      const outsideLocal = corner === 'fl' ? flLocal : frLocal;
+      const oldOutside = localToBoard(unit, outsideLocal);
+      const newOutside = localToBoard({ ...unit, x, y, facing }, outsideLocal);
+      const dist = Math.hypot(newOutside.x - oldOutside.x, newOutside.y - oldOutside.y);
+      if (dist > remainingIn) return;
+      onUpdate(unit.id, { facing: Math.round(facing), x, y }, dist);
+      return;
+    }
+
+    onUpdate(unit.id, { facing: Math.round(facing), x, y });
   }
 
   function handleWheelUp(e: React.PointerEvent) {
@@ -115,6 +152,19 @@ export default function UnitToken({ unit, selected, onSelect, onUpdate, svgRef, 
       onPointerUp={handlePointerUp}
       style={{ cursor: 'grab' }}
     >
+      {selected && phase === 'battle' && Number.isFinite(remainingIn) && (
+        <circle
+          cx={0}
+          cy={0}
+          r={remainingIn}
+          fill="none"
+          stroke="#22d3ee"
+          strokeOpacity={0.4}
+          strokeWidth={0.05}
+          strokeDasharray="0.3 0.3"
+          pointerEvents="none"
+        />
+      )}
       <rect
         x={-widthIn / 2}
         y={-depthIn / 2}

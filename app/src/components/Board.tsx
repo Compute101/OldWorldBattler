@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import type { BoardState, Mode, Selection, Unit } from '../types';
 import UnitToken from './UnitToken';
 import TerrainToken from './TerrainToken';
-import { screenToBoardPoint } from '../units';
+import { remainingMoveIn, screenToBoardPoint } from '../units';
 
 interface View {
   x: number;
@@ -15,7 +15,7 @@ interface Props {
   board: BoardState;
   selection: Selection | null;
   onSelect: (selection: Selection | null) => void;
-  onUpdateUnit: (id: string, patch: Partial<Unit>) => void;
+  onUpdateUnit: (id: string, patch: Partial<Unit>, costIn?: number) => void;
   onMoveTerrain: (id: string, x: number, y: number) => void;
   snapIn: number;
   mode: Mode;
@@ -286,6 +286,8 @@ export default function Board({
             onUpdate={onUpdateUnit}
             svgRef={svgRef}
             snapIn={snapIn}
+            phase={board.phase}
+            remainingIn={remainingMoveIn(unit, board.moveUsed[unit.id] ?? 0, board.movementUnlocked)}
           />
         ))}
         {measure && (
