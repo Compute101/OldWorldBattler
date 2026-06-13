@@ -26,6 +26,7 @@ function App() {
   const [selection, setSelection] = useState<Selection | null>(null);
   const [snapIn, setSnapIn] = useState(1);
   const [mode, setMode] = useState<Mode>('select');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(board));
@@ -87,23 +88,40 @@ function App() {
     setSelection(null);
   }
 
+  function handleSelect(sel: Selection | null) {
+    setSelection(sel);
+    if (sel) setSidebarOpen(true);
+  }
+
   return (
     <div className="app">
       <Sidebar
         board={board}
         selection={selection}
-        onSelect={setSelection}
-        onAddUnit={handleAddUnit}
+        onSelect={handleSelect}
+        onAddUnit={() => {
+          handleAddUnit();
+          setSidebarOpen(true);
+        }}
         onUpdateUnit={handleUpdateUnit}
         onRemoveUnit={handleRemoveUnit}
-        onAddTerrain={handleAddTerrain}
+        onAddTerrain={() => {
+          handleAddTerrain();
+          setSidebarOpen(true);
+        }}
         onUpdateTerrain={handleUpdateTerrain}
         onRemoveTerrain={handleRemoveTerrain}
         onUpdateBoard={handleUpdateBoard}
+        open={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
       />
+      {sidebarOpen && <div className="sidebar-backdrop" onClick={() => setSidebarOpen(false)} />}
       <div className="main">
         <Toolbar board={board} onImport={handleImport} />
         <div className="view-controls">
+          <button className="sidebar-toggle" onClick={() => setSidebarOpen(true)}>
+            ☰ Menu
+          </button>
           <label className="snap-toggle">
             Snap to grid
             <select value={snapIn} onChange={(e) => setSnapIn(Number(e.target.value))}>
@@ -124,7 +142,7 @@ function App() {
         <Board
           board={board}
           selection={selection}
-          onSelect={setSelection}
+          onSelect={handleSelect}
           onMoveUnit={handleMoveUnit}
           onMoveTerrain={handleMoveTerrain}
           snapIn={snapIn}
