@@ -48,10 +48,6 @@ function App() {
     }));
   }
 
-  function handleMoveUnit(id: string, x: number, y: number) {
-    handleUpdateUnit(id, { x, y });
-  }
-
   function handleRemoveUnit(id: string) {
     setBoard((b) => ({ ...b, units: b.units.filter((u) => u.id !== id) }));
     setSelection(null);
@@ -143,7 +139,7 @@ function App() {
           board={board}
           selection={selection}
           onSelect={setSelection}
-          onMoveUnit={handleMoveUnit}
+          onUpdateUnit={handleUpdateUnit}
           onMoveTerrain={handleMoveTerrain}
           snapIn={snapIn}
           mode={mode}

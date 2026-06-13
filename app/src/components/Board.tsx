@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import type { BoardState, Mode, Selection } from '../types';
+import type { BoardState, Mode, Selection, Unit } from '../types';
 import UnitToken from './UnitToken';
 import TerrainToken from './TerrainToken';
 import { screenToBoardPoint } from '../units';
@@ -15,7 +15,7 @@ interface Props {
   board: BoardState;
   selection: Selection | null;
   onSelect: (selection: Selection | null) => void;
-  onMoveUnit: (id: string, x: number, y: number) => void;
+  onUpdateUnit: (id: string, patch: Partial<Unit>) => void;
   onMoveTerrain: (id: string, x: number, y: number) => void;
   snapIn: number;
   mode: Mode;
@@ -29,7 +29,7 @@ export default function Board({
   board,
   selection,
   onSelect,
-  onMoveUnit,
+  onUpdateUnit,
   onMoveTerrain,
   snapIn,
   mode,
@@ -282,7 +282,7 @@ export default function Board({
             unit={unit}
             selected={selection?.type === 'unit' && selection.id === unit.id}
             onSelect={(id) => onSelect({ type: 'unit', id })}
-            onMove={onMoveUnit}
+            onUpdate={onUpdateUnit}
             svgRef={svgRef}
             snapIn={snapIn}
           />
