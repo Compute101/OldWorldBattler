@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { BoardState, DeploymentZones, Selection, Terrain, Unit } from '../types';
 import { BOARD_PRESETS, FACTION_COLORS, TERRAIN_COLORS } from '../units';
 
@@ -14,6 +15,11 @@ interface Props {
   onUpdateBoard: (patch: Partial<BoardState>) => void;
   open: boolean;
   onClose: () => void;
+  onStartBattle: () => void;
+  onBackToSetup: () => void;
+  onEndTurn: () => void;
+  onAddLogNote: (note: string, unitId: string | null) => void;
+  onRemoveLogEntry: (id: string) => void;
 }
 
 const EDGES: DeploymentZones['edges'] = ['north', 'south', 'east', 'west'];
@@ -31,17 +37,32 @@ export default function Sidebar({
   onUpdateBoard,
   open,
   onClose,
+  onStartBattle,
+  onBackToSetup,
+  onEndTurn,
+  onAddLogNote,
+  onRemoveLogEntry,
 }: Props) {
   const selectedUnit =
     selection?.type === 'unit' ? board.units.find((u) => u.id === selection.id) ?? null : null;
   const selectedTerrain =
     selection?.type === 'terrain' ? board.terrain.find((t) => t.id === selection.id) ?? null : null;
 
+  const [noteText, setNoteText] = useState('');
+  const [noteUnitId, setNoteUnitId] = useState('');
+
   function toggleEdge(edge: DeploymentZones['edges'][number]) {
     const edges = board.deploymentZones.edges.includes(edge)
       ? board.deploymentZones.edges.filter((e) => e !== edge)
       : [...board.deploymentZones.edges, edge];
     onUpdateBoard({ deploymentZones: { ...board.deploymentZones, edges } });
+  }
+
+  function handleAddNote() {
+    const note = noteText.trim();
+    if (!note) return;
+    onAddLogNote(note, noteUnitId || null);
+    setNoteText('');
   }
 
   return (
@@ -52,6 +73,78 @@ export default function Sidebar({
           ✕
         </button>
       </div>
+
+      <section>
+        <h3>Battle</h3>
+        <div className="row">
+          <span>
+            Phase: <strong>{board.phase === 'setup' ? 'Setup' : 'Battle'}</strong>
+          </span>
+          {board.phase === 'battle' && (
+            <span>
+              Turn: <strong>{board.turn}</strong>
+            </span>
+          )}
+        </div>
+        {board.phase === 'setup' ? (
+          <button onClick={onStartBattle}>Start Battle</button>
+        ) : (
+          <div className="row">
+            <button onClick={onEndTurn}>End Turn</button>
+            <button onClick={onBackToSetup}>Back to Setup</button>
+          </div>
+        )}
+        {board.phase === 'battle' && (
+          <>
+            <div className="row">
+              <label>
+                Note
+                <input
+                  type="text"
+                  value={noteText}
+                  onChange={(e) => setNoteText(e.target.value)}
+                  placeholder="e.g. charged into combat"
+                />
+              </label>
+              <label>
+                Unit
+                <select value={noteUnitId} onChange={(e) => setNoteUnitId(e.target.value)}>
+                  <option value="">(none)</option>
+                  {board.units.map((u) => (
+                    <option key={u.id} value={u.id}>
+                      {u.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <button onClick={handleAddNote}>Add Note</button>
+            </div>
+            <ul className="log-list">
+              {board.log
+                .slice()
+                .reverse()
+                .map((entry) => (
+                  <li key={entry.id}>
+                    <span className="log-turn">T{entry.turn}</span>
+                    <span className="log-body">
+                      {entry.unitName && <strong>{entry.unitName}</strong>}
+                      {(entry.distanceIn !== 0 || entry.facingChange !== 0) && (
+                        <span>
+                          {' '}
+                          moved {entry.distanceIn}" and turned {entry.facingChange}°
+                        </span>
+                      )}
+                      {entry.note && <span> — {entry.note}</span>}
+                    </span>
+                    <button className="danger" onClick={() => onRemoveLogEntry(entry.id)}>
+                      ✕
+                    </button>
+                  </li>
+                ))}
+            </ul>
+          </>
+        )}
+      </section>
 
       <section>
         <h3>Board</h3>

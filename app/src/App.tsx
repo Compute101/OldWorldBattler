@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import Board from './components/Board';
 import Sidebar from './components/Sidebar';
 import Toolbar from './components/Toolbar';
-import { FACTION_COLORS, defaultBoardState, defaultTerrain, defaultUnit } from './units';
-import type { BoardState, Mode, Selection, Terrain, Unit } from './types';
+import { FACTION_COLORS, angleDiff, defaultBoardState, defaultTerrain, defaultUnit, makeId, snapshotUnits } from './units';
+import type { BoardState, LogEntry, Mode, Selection, Terrain, Unit } from './types';
 import './App.css';
 
 const STORAGE_KEY = 'oldworldbattler-board';
@@ -67,6 +67,7 @@ function App() {
   }
 
   function handleMoveTerrain(id: string, x: number, y: number) {
+    if (board.phase === 'battle') return;
     handleUpdateTerrain(id, { x, y });
   }
 
@@ -87,6 +88,68 @@ function App() {
   function handleSelect(sel: Selection | null) {
     setSelection(sel);
     if (sel) setSidebarOpen(true);
+  }
+
+  function handleStartBattle() {
+    setBoard((b) => ({
+      ...b,
+      phase: 'battle',
+      turn: 1,
+      turnStart: snapshotUnits(b.units),
+      log: [],
+    }));
+  }
+
+  function handleBackToSetup() {
+    setBoard((b) => ({ ...b, phase: 'setup' }));
+  }
+
+  function handleEndTurn() {
+    setBoard((b) => {
+      const entries: LogEntry[] = [];
+      for (const u of b.units) {
+        const start = b.turnStart[u.id];
+        if (!start) continue;
+        const distanceIn = Math.round(Math.hypot(u.x - start.x, u.y - start.y) * 10) / 10;
+        const facingChange = Math.round(angleDiff(start.facing, u.facing));
+        if (distanceIn === 0 && facingChange === 0) continue;
+        entries.push({
+          id: makeId('log'),
+          turn: b.turn,
+          unitId: u.id,
+          unitName: u.name,
+          distanceIn,
+          facingChange,
+          note: '',
+        });
+      }
+      return {
+        ...b,
+        turn: b.turn + 1,
+        turnStart: snapshotUnits(b.units),
+        log: [...b.log, ...entries],
+      };
+    });
+  }
+
+  function handleAddLogNote(note: string, unitId: string | null) {
+    setBoard((b) => {
+      const unit = unitId ? b.units.find((u) => u.id === unitId) : null;
+      const entry: LogEntry = {
+        id: makeId('log'),
+        turn: b.turn,
+        unitId: unitId ?? null,
+        unitName: unit?.name ?? '',
+        distanceIn: 0,
+        facingChange: 0,
+        note,
+      };
+      return { ...b, log: [...b.log, entry] };
+    });
+  }
+
+  function handleRemoveLogEntry(id: string) {
+    setBoard((b) => ({ ...b, log: b.log.filter((e) => e.id !== id) }));
   }
 
   return (
@@ -110,6 +173,11 @@ function App() {
         onUpdateBoard={handleUpdateBoard}
         open={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
+        onStartBattle={handleStartBattle}
+        onBackToSetup={handleBackToSetup}
+        onEndTurn={handleEndTurn}
+        onAddLogNote={handleAddLogNote}
+        onRemoveLogEntry={handleRemoveLogEntry}
       />
       {sidebarOpen && <div className="sidebar-backdrop" onClick={() => setSidebarOpen(false)} />}
       <div className="main">
