@@ -79,6 +79,27 @@ export function screenToBoardPoint(
   return { x: pt.x, y: pt.y };
 }
 
+export function normalizeAngle(deg: number): number {
+  return ((deg % 360) + 360) % 360;
+}
+
+// Rotates a local (x, y) vector by `deg` degrees, matching the SVG `rotate(deg)` transform.
+export function rotateVec(x: number, y: number, deg: number): { x: number; y: number } {
+  const rad = (deg * Math.PI) / 180;
+  const cos = Math.cos(rad);
+  const sin = Math.sin(rad);
+  return {
+    x: x * cos - y * sin,
+    y: x * sin + y * cos,
+  };
+}
+
+// Board-space position of a point given in the unit's local coordinates (before rotation).
+export function localToBoard(unit: Unit, local: { x: number; y: number }): { x: number; y: number } {
+  const r = rotateVec(local.x, local.y, unit.facing);
+  return { x: unit.x + r.x, y: unit.y + r.y };
+}
+
 export function defaultBoardState(): BoardState {
   return {
     widthIn: 48,
