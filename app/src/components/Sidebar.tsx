@@ -296,8 +296,8 @@ export default function Sidebar({
                 onChange={(e) => onUpdateUnit(selectedUnit.id, { colorMajor: e.target.value })}
               >
                 {FACTION_COLORS.map((c) => (
-                  <option key={c} value={c} style={{ background: c }}>
-                    {c}
+                  <option key={c.hex} value={c.hex}>
+                    {c.name}
                   </option>
                 ))}
               </select>
@@ -309,8 +309,8 @@ export default function Sidebar({
                 onChange={(e) => onUpdateUnit(selectedUnit.id, { colorMinor: e.target.value })}
               >
                 {FACTION_COLORS.map((c) => (
-                  <option key={c} value={c} style={{ background: c }}>
-                    {c}
+                  <option key={c.hex} value={c.hex}>
+                    {c.name}
                   </option>
                 ))}
               </select>
@@ -499,8 +499,8 @@ export default function Sidebar({
               onChange={(e) => onUpdateTerrain(selectedTerrain.id, { color: e.target.value })}
             >
               {TERRAIN_COLORS.map((c) => (
-                <option key={c} value={c} style={{ background: c }}>
-                  {c}
+                <option key={c.hex} value={c.hex}>
+                  {c.name}
                 </option>
               ))}
             </select>

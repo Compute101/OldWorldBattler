@@ -14,13 +14,23 @@ export function makeId(prefix = 'unit'): string {
   return `${prefix}-${Date.now()}-${nextId++}`;
 }
 
-export const FACTION_COLORS = [
-  '#c0392b', '#2980b9', '#27ae60', '#8e44ad',
-  '#d35400', '#16a085', '#f39c12', '#7f8c8d',
+export const FACTION_COLORS: { name: string; hex: string }[] = [
+  { name: 'Red', hex: '#c0392b' },
+  { name: 'Blue', hex: '#2980b9' },
+  { name: 'Green', hex: '#27ae60' },
+  { name: 'Purple', hex: '#8e44ad' },
+  { name: 'Orange', hex: '#d35400' },
+  { name: 'Teal', hex: '#16a085' },
+  { name: 'Yellow', hex: '#f39c12' },
+  { name: 'Grey', hex: '#7f8c8d' },
 ];
 
-export const TERRAIN_COLORS = [
-  '#5d6b3a', '#7a6a4f', '#5a5a5a', '#3a6b6b', '#6b5a3a',
+export const TERRAIN_COLORS: { name: string; hex: string }[] = [
+  { name: 'Olive Green', hex: '#5d6b3a' },
+  { name: 'Brown', hex: '#7a6a4f' },
+  { name: 'Grey', hex: '#5a5a5a' },
+  { name: 'Teal', hex: '#3a6b6b' },
+  { name: 'Tan', hex: '#6b5a3a' },
 ];
 
 export const COLOR_SCHEMES: { value: ColorScheme; label: string }[] = [
@@ -66,7 +76,7 @@ export function defaultUnit(faction: string, colorMajor: string, colorMinor = '#
 // Backfills units saved before colour/unit-type fields existed.
 export function normalizeUnit(unit: Partial<Unit> & { color?: string }): Unit {
   const { color, ...rest } = unit;
-  const base = defaultUnit(unit.faction ?? 'Faction', unit.colorMajor ?? color ?? FACTION_COLORS[0]);
+  const base = defaultUnit(unit.faction ?? 'Faction', unit.colorMajor ?? color ?? FACTION_COLORS[0].hex);
   return { ...base, ...rest };
 }
 
@@ -75,7 +85,7 @@ export function defaultTerrain(centerX: number, centerY: number): Terrain {
     id: makeId('terrain'),
     name: 'Terrain',
     shape: 'rect',
-    color: TERRAIN_COLORS[0],
+    color: TERRAIN_COLORS[0].hex,
     widthIn: 6,
     depthIn: 6,
     x: centerX,

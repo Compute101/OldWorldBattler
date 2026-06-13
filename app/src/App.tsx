@@ -34,7 +34,7 @@ function App() {
   }, [board]);
 
   function handleAddUnit() {
-    const color = FACTION_COLORS[board.units.length % FACTION_COLORS.length];
+    const color = FACTION_COLORS[board.units.length % FACTION_COLORS.length].hex;
     const unit = defaultUnit('Faction', color);
     unit.x = board.widthIn / 2;
     unit.y = board.heightIn / 2;
