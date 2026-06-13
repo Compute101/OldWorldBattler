@@ -16,21 +16,39 @@ export function makeId(prefix = 'unit'): string {
 
 export const FACTION_COLORS: { name: string; hex: string }[] = [
   { name: 'Red', hex: '#c0392b' },
-  { name: 'Blue', hex: '#2980b9' },
-  { name: 'Green', hex: '#27ae60' },
-  { name: 'Purple', hex: '#8e44ad' },
+  { name: 'Crimson', hex: '#a51c30' },
+  { name: 'Maroon', hex: '#6e2c2c' },
   { name: 'Orange', hex: '#d35400' },
-  { name: 'Teal', hex: '#16a085' },
+  { name: 'Gold', hex: '#c8a02e' },
   { name: 'Yellow', hex: '#f39c12' },
+  { name: 'Green', hex: '#27ae60' },
+  { name: 'Dark Green', hex: '#1e5631' },
+  { name: 'Teal', hex: '#16a085' },
+  { name: 'Cyan', hex: '#3498db' },
+  { name: 'Blue', hex: '#2980b9' },
+  { name: 'Navy', hex: '#1f3a5f' },
+  { name: 'Purple', hex: '#8e44ad' },
+  { name: 'Magenta', hex: '#c0398e' },
+  { name: 'Pink', hex: '#e08bb6' },
+  { name: 'Brown', hex: '#7a5230' },
+  { name: 'Black', hex: '#2c2c2c' },
+  { name: 'White', hex: '#ecf0f1' },
   { name: 'Grey', hex: '#7f8c8d' },
+  { name: 'Silver', hex: '#bdc3c7' },
 ];
 
 export const TERRAIN_COLORS: { name: string; hex: string }[] = [
   { name: 'Olive Green', hex: '#5d6b3a' },
+  { name: 'Dark Green', hex: '#3a4d2c' },
   { name: 'Brown', hex: '#7a6a4f' },
+  { name: 'Dark Brown', hex: '#4f3f2a' },
+  { name: 'Tan', hex: '#6b5a3a' },
+  { name: 'Sand', hex: '#c2b280' },
+  { name: 'Stone Grey', hex: '#8a8a8a' },
   { name: 'Grey', hex: '#5a5a5a' },
   { name: 'Teal', hex: '#3a6b6b' },
-  { name: 'Tan', hex: '#6b5a3a' },
+  { name: 'Rust', hex: '#8a4a2a' },
+  { name: 'Snow White', hex: '#e8edf0' },
 ];
 
 export const COLOR_SCHEMES: { value: ColorScheme; label: string }[] = [
