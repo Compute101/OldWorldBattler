@@ -1,6 +1,7 @@
 import { useRef } from 'react';
 import type { Phase, Unit } from '../types';
 import { footprintInches, localToBoard, normalizeAngle, rotateVec, screenToBoardPoint } from '../units';
+import UnitTypeIcon from './UnitTypeIcon';
 
 interface Props {
   unit: Unit;
@@ -165,34 +166,16 @@ export default function UnitToken({ unit, selected, onSelect, onUpdate, svgRef, 
           pointerEvents="none"
         />
       )}
-      <rect
-        x={-widthIn / 2}
-        y={-depthIn / 2}
-        width={widthIn}
-        height={depthIn}
-        fill={unit.color}
-        fillOpacity={0.55}
-        stroke={selected ? '#ffffff' : '#222222'}
-        strokeWidth={selected ? 0.12 : 0.05}
-      />
+      <UnitFill unit={unit} widthIn={widthIn} depthIn={depthIn} selected={selected} />
       {/* facing arrow */}
       <line x1={0} y1={0} x2={0} y2={-depthIn / 2} stroke="#ffffff" strokeWidth={0.08} />
       <polygon
         points={`0,${-depthIn / 2 - 0.4} -0.3,${-depthIn / 2 + 0.2} 0.3,${-depthIn / 2 + 0.2}`}
         fill="#ffffff"
       />
-      <text
-        x={0}
-        y={0}
-        transform={`rotate(${-unit.facing})`}
-        textAnchor="middle"
-        dominantBaseline="middle"
-        fontSize={Math.min(widthIn, depthIn) * 0.35}
-        fill="#000"
-        style={{ pointerEvents: 'none', userSelect: 'none' }}
-      >
-        {unit.name}
-      </text>
+      <g transform={`rotate(${-unit.facing})`} style={{ pointerEvents: 'none' }}>
+        <UnitTypeIcon unitType={unit.unitType} size={Math.min(widthIn, depthIn) * 0.6} />
+      </g>
 
       {selected && (
         <>
@@ -246,6 +229,51 @@ export default function UnitToken({ unit, selected, onSelect, onUpdate, svgRef, 
           />
         </>
       )}
+    </g>
+  );
+}
+
+function UnitFill({
+  unit,
+  widthIn,
+  depthIn,
+  selected,
+}: {
+  unit: Unit;
+  widthIn: number;
+  depthIn: number;
+  selected: boolean;
+}) {
+  const w = widthIn;
+  const h = depthIn;
+  const stroke = selected ? '#ffffff' : '#222222';
+  const strokeWidth = selected ? 0.12 : 0.05;
+  const fillOpacity = 0.55;
+
+  let minorShape: React.ReactNode = null;
+  switch (unit.colorScheme) {
+    case 'vertical':
+      minorShape = <rect x={0} y={-h / 2} width={w / 2} height={h} fill={unit.colorMinor} fillOpacity={fillOpacity} />;
+      break;
+    case 'horizontal':
+      minorShape = <rect x={-w / 2} y={0} width={w} height={h / 2} fill={unit.colorMinor} fillOpacity={fillOpacity} />;
+      break;
+    case 'diagonal':
+      minorShape = (
+        <polygon
+          points={`${w / 2},${-h / 2} ${w / 2},${h / 2} ${-w / 2},${h / 2}`}
+          fill={unit.colorMinor}
+          fillOpacity={fillOpacity}
+        />
+      );
+      break;
+  }
+
+  return (
+    <g>
+      <rect x={-w / 2} y={-h / 2} width={w} height={h} fill={unit.colorMajor} fillOpacity={fillOpacity} />
+      {minorShape}
+      <rect x={-w / 2} y={-h / 2} width={w} height={h} fill="none" stroke={stroke} strokeWidth={strokeWidth} />
     </g>
   );
 }

@@ -1,4 +1,4 @@
-import type { BoardState, Terrain, Unit, UnitTransform } from './types';
+import type { BoardState, ColorScheme, Terrain, Unit, UnitTransform, UnitType } from './types';
 
 export const MM_PER_INCH = 25.4;
 
@@ -23,12 +23,33 @@ export const TERRAIN_COLORS = [
   '#5d6b3a', '#7a6a4f', '#5a5a5a', '#3a6b6b', '#6b5a3a',
 ];
 
-export function defaultUnit(faction: string, color: string): Unit {
+export const COLOR_SCHEMES: { value: ColorScheme; label: string }[] = [
+  { value: 'solid', label: 'Solid' },
+  { value: 'vertical', label: 'Vertical split' },
+  { value: 'horizontal', label: 'Horizontal split' },
+  { value: 'diagonal', label: 'Diagonal split' },
+];
+
+// Troop-type categories from the Old World rules, each with a thematic icon
+// usable across all factions.
+export const UNIT_TYPES: { value: UnitType; label: string }[] = [
+  { value: 'infantry', label: 'Infantry (sword)' },
+  { value: 'cavalry', label: 'Cavalry (heater shield)' },
+  { value: 'chariot', label: 'Chariot (wheel)' },
+  { value: 'monster', label: 'Monster (axe)' },
+  { value: 'warMachine', label: 'War Machine (diamond)' },
+  { value: 'character', label: 'Character (heart)' },
+];
+
+export function defaultUnit(faction: string, colorMajor: string, colorMinor = '#e8e8e8'): Unit {
   return {
     id: makeId('unit'),
     name: 'New Unit',
     faction,
-    color,
+    colorMajor,
+    colorMinor,
+    colorScheme: 'solid',
+    unitType: 'infantry',
     baseWidthMm: 25,
     baseDepthMm: 25,
     ranks: 1,
@@ -40,6 +61,13 @@ export function defaultUnit(faction: string, color: string): Unit {
     marching: false,
     notes: '',
   };
+}
+
+// Backfills units saved before colour/unit-type fields existed.
+export function normalizeUnit(unit: Partial<Unit> & { color?: string }): Unit {
+  const { color, ...rest } = unit;
+  const base = defaultUnit(unit.faction ?? 'Faction', unit.colorMajor ?? color ?? FACTION_COLORS[0]);
+  return { ...base, ...rest };
 }
 
 export function defaultTerrain(centerX: number, centerY: number): Terrain {
