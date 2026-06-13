@@ -10,6 +10,8 @@ export interface Unit {
   x: number; // center position in inches
   y: number; // center position in inches
   facing: number; // degrees clockwise from north (0 = up)
+  movementIn: number; // Movement (M) characteristic, in inches
+  marching: boolean; // marching this turn doubles the movement allowance
   notes: string;
 }
 
@@ -61,6 +63,8 @@ export interface BoardState {
   phase: Phase;
   turn: number;
   turnStart: Record<string, UnitTransform>;
+  moveUsed: Record<string, number>; // inches of movement used this turn, per unit
+  movementUnlocked: boolean; // override to ignore movement-allowance limits
   log: LogEntry[];
 }
 

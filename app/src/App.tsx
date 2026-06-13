@@ -41,10 +41,13 @@ function App() {
     setSelection({ type: 'unit', id: unit.id });
   }
 
-  function handleUpdateUnit(id: string, patch: Partial<Unit>) {
+  function handleUpdateUnit(id: string, patch: Partial<Unit>, costIn?: number) {
     setBoard((b) => ({
       ...b,
       units: b.units.map((u) => (u.id === id ? { ...u, ...patch } : u)),
+      moveUsed: costIn
+        ? { ...b.moveUsed, [id]: (b.moveUsed[id] ?? 0) + costIn }
+        : b.moveUsed,
     }));
   }
 
@@ -96,6 +99,7 @@ function App() {
       phase: 'battle',
       turn: 1,
       turnStart: snapshotUnits(b.units),
+      moveUsed: {},
       log: [],
     }));
   }
@@ -127,6 +131,7 @@ function App() {
         ...b,
         turn: b.turn + 1,
         turnStart: snapshotUnits(b.units),
+        moveUsed: {},
         log: [...b.log, ...entries],
       };
     });
