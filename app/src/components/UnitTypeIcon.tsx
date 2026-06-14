@@ -102,11 +102,21 @@ export default function UnitTypeIcon({ icon, size, fill = '#ffffff' }: Props) {
         />
       );
     case 'cannon':
-      // Barrel on a wheel
+      // Empire-style cannon: spoked wheel, thin angled barrel, and breech for the carriage
       return (
         <g fill={fill} stroke={stroke} strokeWidth={strokeWidth}>
-          <rect x={-s * 0.9} y={-s * 0.25} width={s * 1.6} height={s * 0.5} rx={s * 0.1} />
-          <circle cx={-s * 0.5} cy={s * 0.55} r={s * 0.35} fill="none" stroke={fill} strokeWidth={size * 0.1} />
+          <line x1={-s * 0.9} y1={s * 0.95} x2={-s * 0.2} y2={s * 0.2} stroke={fill} strokeWidth={size * 0.1} strokeLinecap="round" />
+          <g stroke={fill} strokeWidth={size * 0.06}>
+            {rays(6, s * 0.18, s * 0.55).map((r, i) => (
+              <line key={i} x1={s * 0.15 + r.x1} y1={s * 0.45 + r.y1} x2={s * 0.15 + r.x2} y2={s * 0.45 + r.y2} />
+            ))}
+          </g>
+          <circle cx={s * 0.15} cy={s * 0.45} r={s * 0.55} fill="none" stroke={fill} strokeWidth={size * 0.1} />
+          <circle cx={s * 0.15} cy={s * 0.45} r={s * 0.16} fill={fill} />
+          <g transform={`rotate(-12 ${-s * 0.1} ${-s * 0.3})`}>
+            <rect x={-s * 0.75} y={-s * 0.48} width={s * 1.65} height={s * 0.3} rx={s * 0.08} />
+            <rect x={-s * 0.85} y={-s * 0.52} width={s * 0.3} height={s * 0.38} rx={s * 0.05} />
+          </g>
         </g>
       );
     case 'handgun':
