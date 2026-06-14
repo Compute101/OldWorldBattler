@@ -45,9 +45,9 @@ export default function UnitTypeIcon({ icon, size, fill = '#ffffff' }: Props) {
       // Sword: blade, crossguard, hilt
       return (
         <g stroke={stroke} strokeWidth={strokeWidth} strokeLinecap="round">
-          <line x1={0} y1={-s} x2={0} y2={s * 0.5} stroke={fill} strokeWidth={size * 0.14} />
-          <line x1={-s * 0.55} y1={s * 0.05} x2={s * 0.55} y2={s * 0.05} stroke={fill} strokeWidth={size * 0.12} />
-          <line x1={0} y1={s * 0.05} x2={0} y2={s} stroke={fill} strokeWidth={size * 0.12} />
+          <line x1={0} y1={-s} x2={0} y2={s * 0.55} stroke={fill} strokeWidth={size * 0.14} />
+          <line x1={-s * 0.55} y1={s * 0.45} x2={s * 0.55} y2={s * 0.45} stroke={fill} strokeWidth={size * 0.12} />
+          <line x1={0} y1={s * 0.45} x2={0} y2={s} stroke={fill} strokeWidth={size * 0.12} />
         </g>
       );
     case 'cavalry':
