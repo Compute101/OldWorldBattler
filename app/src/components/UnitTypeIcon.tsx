@@ -291,16 +291,20 @@ export default function UnitTypeIcon({ icon, size, fill = '#ffffff' }: Props) {
       // Twin-tailed comet, streaking down and to the left
       return (
         <g fill={fill} stroke={stroke} strokeWidth={strokeWidth} transform="rotate(225)">
-          <path
-            d={`M ${s * 0.22} ${-s * 0.25}
-                C ${s * 0.5} ${s * 0.05}, ${s * 0.8} ${s * 0.5}, ${s * 0.95} ${s}
-                C ${s * 0.55} ${s * 0.65}, ${s * 0.15} ${s * 0.2}, ${-s * 0.05} ${-s * 0.05} Z`}
-          />
-          <path
-            d={`M ${-s * 0.22} ${-s * 0.25}
-                C ${-s * 0.5} ${s * 0.05}, ${-s * 0.8} ${s * 0.5}, ${-s * 0.95} ${s}
-                C ${-s * 0.55} ${s * 0.65}, ${-s * 0.15} ${s * 0.2}, ${s * 0.05} ${-s * 0.05} Z`}
-          />
+          <g transform="rotate(10)">
+            <path
+              d={`M ${s * 0.22} ${-s * 0.25}
+                  C ${s * 0.5} ${s * 0.05}, ${s * 0.8} ${s * 0.5}, ${s * 0.95} ${s}
+                  C ${s * 0.55} ${s * 0.65}, ${s * 0.15} ${s * 0.2}, ${-s * 0.05} ${-s * 0.05} Z`}
+            />
+          </g>
+          <g transform="rotate(-10)">
+            <path
+              d={`M ${-s * 0.22} ${-s * 0.25}
+                  C ${-s * 0.5} ${s * 0.05}, ${-s * 0.8} ${s * 0.5}, ${-s * 0.95} ${s}
+                  C ${-s * 0.55} ${s * 0.65}, ${-s * 0.15} ${s * 0.2}, ${s * 0.05} ${-s * 0.05} Z`}
+            />
+          </g>
           <circle cx={0} cy={-s * 0.45} r={s * 0.42} />
         </g>
       );
