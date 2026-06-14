@@ -78,6 +78,10 @@ export const ICON_GROUPS: { label: string; options: { value: IconType; label: st
     options: [
       { value: 'cannon', label: 'Cannon' },
       { value: 'handgun', label: 'Handgun' },
+      { value: 'twoHandedSword', label: 'Two-Handed Sword' },
+      { value: 'broadsword', label: 'Broadsword' },
+      { value: 'swordHilt', label: 'Sword Hilt' },
+      { value: 'dagger', label: 'Dagger' },
       { value: 'bowArrow', label: 'Bow & Arrow' },
       { value: 'arrow', label: 'Arrow' },
       { value: 'broadheadArrow', label: 'Broadhead Arrow' },
