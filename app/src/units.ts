@@ -80,6 +80,10 @@ export const ICON_GROUPS: { label: string; options: { value: IconType; label: st
       { value: 'handgun', label: 'Handgun' },
       { value: 'bowArrow', label: 'Bow & Arrow' },
       { value: 'arrow', label: 'Arrow' },
+      { value: 'broadheadArrow', label: 'Broadhead Arrow' },
+      { value: 'arrowhead', label: 'Arrowhead' },
+      { value: 'arrowCluster', label: 'Arrow Cluster' },
+      { value: 'arrowFlights', label: 'Arrow Flights' },
     ],
   },
   {
