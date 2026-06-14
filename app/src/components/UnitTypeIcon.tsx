@@ -194,6 +194,49 @@ export default function UnitTypeIcon({ icon, size, fill = '#ffffff' }: Props) {
           <rect x={-s * 0.75} y={-s * 0.85} width={s * 1.5} height={s * 0.55} />
         </g>
       );
+    case 'hammer':
+      // Two-headed war hammer
+      return (
+        <g fill={fill} stroke={stroke} strokeWidth={strokeWidth}>
+          <rect x={-s * 0.12} y={-s * 0.6} width={s * 0.24} height={s * 1.2} />
+          <rect x={-s * 0.55} y={-s * 0.95} width={s * 1.1} height={s * 0.4} rx={s * 0.05} />
+          <rect x={-s * 0.55} y={s * 0.55} width={s * 1.1} height={s * 0.4} rx={s * 0.05} />
+        </g>
+      );
+    case 'anvil':
+      // Anvil: top face with horn, waist, and base
+      return (
+        <g fill={fill} stroke={stroke} strokeWidth={strokeWidth}>
+          <path d={`M ${-s * 0.75} ${-s * 0.35} H ${s * 0.35} L ${s * 0.95} ${-s * 0.05} L ${s * 0.35} ${s * 0.05} H ${-s * 0.75} Z`} />
+          <rect x={-s * 0.5} y={s * 0.05} width={s * 1.0} height={s * 0.15} />
+          <rect x={-s * 0.65} y={s * 0.2} width={s * 1.3} height={s * 0.25} />
+        </g>
+      );
+    case 'hammerAnvil':
+      // Hammer striking an anvil
+      return (
+        <g fill={fill} stroke={stroke} strokeWidth={strokeWidth}>
+          <g transform={`translate(${-s * 0.1} ${s * 0.35}) scale(0.7)`}>
+            <path d={`M ${-s * 0.75} ${-s * 0.35} H ${s * 0.35} L ${s * 0.95} ${-s * 0.05} L ${s * 0.35} ${s * 0.05} H ${-s * 0.75} Z`} />
+            <rect x={-s * 0.5} y={s * 0.05} width={s * 1.0} height={s * 0.15} />
+            <rect x={-s * 0.65} y={s * 0.2} width={s * 1.3} height={s * 0.25} />
+          </g>
+          <g transform={`translate(${s * 0.3} ${-s * 0.2}) rotate(-35) scale(0.65)`}>
+            <rect x={-s * 0.1} y={-s * 0.5} width={s * 0.2} height={s * 1.3} />
+            <rect x={-s * 0.5} y={-s * 0.9} width={s * 1.0} height={s * 0.45} rx={s * 0.05} />
+          </g>
+        </g>
+      );
+    case 'roundShield':
+      // Round shield with central boss
+      return (
+        <g fill={fill} stroke={stroke} strokeWidth={strokeWidth}>
+          <circle cx={0} cy={0} r={s * 0.95} />
+          <circle cx={0} cy={0} r={s * 0.35} fill="none" stroke={stroke} strokeWidth={strokeWidth} />
+          <line x1={0} y1={-s * 0.95} x2={0} y2={s * 0.95} stroke={stroke} strokeWidth={strokeWidth * 0.6} />
+          <line x1={-s * 0.95} y1={0} x2={s * 0.95} y2={0} stroke={stroke} strokeWidth={strokeWidth * 0.6} />
+        </g>
+      );
     case 'phoenix':
       // Flame silhouette
       return (

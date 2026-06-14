@@ -95,6 +95,10 @@ export const ICON_GROUPS: { label: string; options: { value: IconType; label: st
     options: [
       { value: 'chaosStar', label: 'Chaos Star (Chaos)' },
       { value: 'dwarfHammer', label: 'Rune Hammer (Dwarfs)' },
+      { value: 'hammer', label: 'Hammer (Dwarfs)' },
+      { value: 'anvil', label: 'Anvil (Dwarfs)' },
+      { value: 'hammerAnvil', label: 'Hammer & Anvil (Dwarfs)' },
+      { value: 'roundShield', label: 'Round Shield (Dwarfs)' },
       { value: 'phoenix', label: 'Phoenix (High Elves)' },
       { value: 'leaf', label: 'Leaf (Wood Elves)' },
       { value: 'ratClaw', label: 'Rat Claw (Skaven)' },
