@@ -1,4 +1,4 @@
-import type { BoardState, ColorScheme, Terrain, Unit, UnitTransform, UnitType } from './types';
+import type { BoardState, ColorScheme, IconType, Terrain, Unit, UnitTransform } from './types';
 
 export const MM_PER_INCH = 25.4;
 
@@ -16,21 +16,39 @@ export function makeId(prefix = 'unit'): string {
 
 export const FACTION_COLORS: { name: string; hex: string }[] = [
   { name: 'Red', hex: '#c0392b' },
-  { name: 'Blue', hex: '#2980b9' },
-  { name: 'Green', hex: '#27ae60' },
-  { name: 'Purple', hex: '#8e44ad' },
+  { name: 'Crimson', hex: '#a51c30' },
+  { name: 'Maroon', hex: '#6e2c2c' },
   { name: 'Orange', hex: '#d35400' },
-  { name: 'Teal', hex: '#16a085' },
+  { name: 'Gold', hex: '#c8a02e' },
   { name: 'Yellow', hex: '#f39c12' },
+  { name: 'Green', hex: '#27ae60' },
+  { name: 'Dark Green', hex: '#1e5631' },
+  { name: 'Teal', hex: '#16a085' },
+  { name: 'Cyan', hex: '#3498db' },
+  { name: 'Blue', hex: '#2980b9' },
+  { name: 'Navy', hex: '#1f3a5f' },
+  { name: 'Purple', hex: '#8e44ad' },
+  { name: 'Magenta', hex: '#c0398e' },
+  { name: 'Pink', hex: '#e08bb6' },
+  { name: 'Brown', hex: '#7a5230' },
+  { name: 'Black', hex: '#2c2c2c' },
+  { name: 'White', hex: '#ecf0f1' },
   { name: 'Grey', hex: '#7f8c8d' },
+  { name: 'Silver', hex: '#bdc3c7' },
 ];
 
 export const TERRAIN_COLORS: { name: string; hex: string }[] = [
   { name: 'Olive Green', hex: '#5d6b3a' },
+  { name: 'Dark Green', hex: '#3a4d2c' },
   { name: 'Brown', hex: '#7a6a4f' },
+  { name: 'Dark Brown', hex: '#4f3f2a' },
+  { name: 'Tan', hex: '#6b5a3a' },
+  { name: 'Sand', hex: '#c2b280' },
+  { name: 'Stone Grey', hex: '#8a8a8a' },
   { name: 'Grey', hex: '#5a5a5a' },
   { name: 'Teal', hex: '#3a6b6b' },
-  { name: 'Tan', hex: '#6b5a3a' },
+  { name: 'Rust', hex: '#8a4a2a' },
+  { name: 'Snow White', hex: '#e8edf0' },
 ];
 
 export const COLOR_SCHEMES: { value: ColorScheme; label: string }[] = [
@@ -40,15 +58,58 @@ export const COLOR_SCHEMES: { value: ColorScheme; label: string }[] = [
   { value: 'diagonal', label: 'Diagonal split' },
 ];
 
-// Troop-type categories from the Old World rules, each with a thematic icon
-// usable across all factions.
-export const UNIT_TYPES: { value: UnitType; label: string }[] = [
-  { value: 'infantry', label: 'Infantry (sword)' },
-  { value: 'cavalry', label: 'Cavalry (heater shield)' },
-  { value: 'chariot', label: 'Chariot (wheel)' },
-  { value: 'monster', label: 'Monster (axe)' },
-  { value: 'warMachine', label: 'War Machine (diamond)' },
-  { value: 'character', label: 'Character (heart)' },
+// Icon choices for unit markers, grouped for the sidebar dropdown. Troop-type
+// icons reflect the Old World troop categories; the rest are generic
+// weapon/symbol icons and faction emblems usable by any army.
+export const ICON_GROUPS: { label: string; options: { value: IconType; label: string }[] }[] = [
+  {
+    label: 'Troop Types',
+    options: [
+      { value: 'infantry', label: 'Infantry (sword)' },
+      { value: 'cavalry', label: 'Cavalry (heater shield)' },
+      { value: 'chariot', label: 'Chariot (wheel)' },
+      { value: 'monster', label: 'Monster (axe)' },
+      { value: 'warMachine', label: 'War Machine (diamond)' },
+      { value: 'character', label: 'Character (heart)' },
+    ],
+  },
+  {
+    label: 'Weapons',
+    options: [
+      { value: 'cannon', label: 'Cannon' },
+      { value: 'handgun', label: 'Handgun' },
+      { value: 'bowArrow', label: 'Bow & Arrow' },
+      { value: 'arrow', label: 'Arrow' },
+    ],
+  },
+  {
+    label: 'Skulls & Bones',
+    options: [
+      { value: 'skull', label: 'Skull' },
+      { value: 'orcSkull', label: 'Orc Skull' },
+      { value: 'crossedBones', label: 'Crossed Bones' },
+    ],
+  },
+  {
+    label: 'Faction Symbols',
+    options: [
+      { value: 'chaosStar', label: 'Chaos Star (Chaos)' },
+      { value: 'dwarfHammer', label: 'Rune Hammer (Dwarfs)' },
+      { value: 'hammer', label: 'Hammer (Dwarfs)' },
+      { value: 'anvil', label: 'Anvil (Dwarfs)' },
+      { value: 'hammerAnvil', label: 'Hammer & Anvil (Dwarfs)' },
+      { value: 'roundShield', label: 'Round Shield (Dwarfs)' },
+      { value: 'phoenix', label: 'Phoenix (High Elves)' },
+      { value: 'leaf', label: 'Leaf (Wood Elves)' },
+      { value: 'ratClaw', label: 'Rat Claw (Skaven)' },
+      { value: 'vampireBat', label: 'Bat (Vampire Counts)' },
+      { value: 'comet', label: 'Twin-Tailed Comet (Empire)' },
+      { value: 'fleurDeLis', label: 'Fleur-de-Lis (Bretonnia)' },
+      { value: 'ankh', label: 'Ankh (Tomb Kings)' },
+      { value: 'sunDisc', label: 'Sun Disc (Lizardmen)' },
+      { value: 'spider', label: 'Spider (Dark Elves)' },
+    ],
+  },
 ];
 
 export function defaultUnit(faction: string, colorMajor: string, colorMinor = '#e8e8e8'): Unit {
@@ -59,7 +120,7 @@ export function defaultUnit(faction: string, colorMajor: string, colorMinor = '#
     colorMajor,
     colorMinor,
     colorScheme: 'solid',
-    unitType: 'infantry',
+    icon: 'infantry',
     baseWidthMm: 25,
     baseDepthMm: 25,
     ranks: 1,
@@ -73,11 +134,11 @@ export function defaultUnit(faction: string, colorMajor: string, colorMinor = '#
   };
 }
 
-// Backfills units saved before colour/unit-type fields existed.
-export function normalizeUnit(unit: Partial<Unit> & { color?: string }): Unit {
-  const { color, ...rest } = unit;
+// Backfills units saved before colour/unit-type/icon fields existed.
+export function normalizeUnit(unit: Partial<Unit> & { color?: string; unitType?: IconType }): Unit {
+  const { color, unitType, ...rest } = unit;
   const base = defaultUnit(unit.faction ?? 'Faction', unit.colorMajor ?? color ?? FACTION_COLORS[0].hex);
-  return { ...base, ...rest };
+  return { ...base, icon: unitType ?? base.icon, ...rest };
 }
 
 export function defaultTerrain(centerX: number, centerY: number): Terrain {

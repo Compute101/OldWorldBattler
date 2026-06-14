@@ -1,6 +1,34 @@
 export type ColorScheme = 'solid' | 'vertical' | 'horizontal' | 'diagonal';
 
-export type UnitType = 'infantry' | 'cavalry' | 'chariot' | 'monster' | 'warMachine' | 'character';
+export type IconType =
+  | 'infantry'
+  | 'cavalry'
+  | 'chariot'
+  | 'monster'
+  | 'warMachine'
+  | 'character'
+  | 'cannon'
+  | 'handgun'
+  | 'bowArrow'
+  | 'arrow'
+  | 'skull'
+  | 'orcSkull'
+  | 'crossedBones'
+  | 'chaosStar'
+  | 'dwarfHammer'
+  | 'hammer'
+  | 'anvil'
+  | 'hammerAnvil'
+  | 'roundShield'
+  | 'phoenix'
+  | 'ratClaw'
+  | 'leaf'
+  | 'vampireBat'
+  | 'comet'
+  | 'fleurDeLis'
+  | 'ankh'
+  | 'sunDisc'
+  | 'spider';
 
 export interface Unit {
   id: string;
@@ -9,7 +37,7 @@ export interface Unit {
   colorMajor: string;
   colorMinor: string;
   colorScheme: ColorScheme;
-  unitType: UnitType;
+  icon: IconType;
   baseWidthMm: number;
   baseDepthMm: number;
   ranks: number;

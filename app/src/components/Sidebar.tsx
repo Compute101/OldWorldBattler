@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import type { BoardState, ColorScheme, DeploymentZones, Selection, Terrain, Unit, UnitType } from '../types';
-import { BOARD_PRESETS, COLOR_SCHEMES, FACTION_COLORS, TERRAIN_COLORS, UNIT_TYPES, isMarchingColumn, remainingMoveIn } from '../units';
+import type { BoardState, ColorScheme, DeploymentZones, IconType, Selection, Terrain, Unit } from '../types';
+import { BOARD_PRESETS, COLOR_SCHEMES, FACTION_COLORS, ICON_GROUPS, TERRAIN_COLORS, isMarchingColumn, remainingMoveIn } from '../units';
 import NumberField from './NumberField';
 
 function swatchBackground(major: string, minor: string, scheme: ColorScheme): string {
@@ -331,15 +331,19 @@ export default function Sidebar({
               </select>
             </label>
             <label>
-              Unit Type
+              Icon
               <select
-                value={selectedUnit.unitType}
-                onChange={(e) => onUpdateUnit(selectedUnit.id, { unitType: e.target.value as UnitType })}
+                value={selectedUnit.icon}
+                onChange={(e) => onUpdateUnit(selectedUnit.id, { icon: e.target.value as IconType })}
               >
-                {UNIT_TYPES.map((t) => (
-                  <option key={t.value} value={t.value}>
-                    {t.label}
-                  </option>
+                {ICON_GROUPS.map((group) => (
+                  <optgroup key={group.label} label={group.label}>
+                    {group.options.map((o) => (
+                      <option key={o.value} value={o.value}>
+                        {o.label}
+                      </option>
+                    ))}
+                  </optgroup>
                 ))}
               </select>
             </label>
