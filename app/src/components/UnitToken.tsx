@@ -174,7 +174,7 @@ export default function UnitToken({ unit, selected, onSelect, onUpdate, svgRef, 
         fill="#ffffff"
       />
       <g transform={`rotate(${-unit.facing})`} style={{ pointerEvents: 'none' }}>
-        <UnitTypeIcon unitType={unit.unitType} size={Math.min(widthIn, depthIn) * 0.6} />
+        <UnitTypeIcon icon={unit.icon} size={Math.min(widthIn, depthIn) * 0.6} />
       </g>
 
       {selected && (

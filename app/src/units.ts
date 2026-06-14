@@ -1,4 +1,4 @@
-import type { BoardState, ColorScheme, Terrain, Unit, UnitTransform, UnitType } from './types';
+import type { BoardState, ColorScheme, IconType, Terrain, Unit, UnitTransform } from './types';
 
 export const MM_PER_INCH = 25.4;
 
@@ -58,15 +58,54 @@ export const COLOR_SCHEMES: { value: ColorScheme; label: string }[] = [
   { value: 'diagonal', label: 'Diagonal split' },
 ];
 
-// Troop-type categories from the Old World rules, each with a thematic icon
-// usable across all factions.
-export const UNIT_TYPES: { value: UnitType; label: string }[] = [
-  { value: 'infantry', label: 'Infantry (sword)' },
-  { value: 'cavalry', label: 'Cavalry (heater shield)' },
-  { value: 'chariot', label: 'Chariot (wheel)' },
-  { value: 'monster', label: 'Monster (axe)' },
-  { value: 'warMachine', label: 'War Machine (diamond)' },
-  { value: 'character', label: 'Character (heart)' },
+// Icon choices for unit markers, grouped for the sidebar dropdown. Troop-type
+// icons reflect the Old World troop categories; the rest are generic
+// weapon/symbol icons and faction emblems usable by any army.
+export const ICON_GROUPS: { label: string; options: { value: IconType; label: string }[] }[] = [
+  {
+    label: 'Troop Types',
+    options: [
+      { value: 'infantry', label: 'Infantry (sword)' },
+      { value: 'cavalry', label: 'Cavalry (heater shield)' },
+      { value: 'chariot', label: 'Chariot (wheel)' },
+      { value: 'monster', label: 'Monster (axe)' },
+      { value: 'warMachine', label: 'War Machine (diamond)' },
+      { value: 'character', label: 'Character (heart)' },
+    ],
+  },
+  {
+    label: 'Weapons',
+    options: [
+      { value: 'cannon', label: 'Cannon' },
+      { value: 'handgun', label: 'Handgun' },
+      { value: 'bowArrow', label: 'Bow & Arrow' },
+      { value: 'arrow', label: 'Arrow' },
+    ],
+  },
+  {
+    label: 'Skulls & Bones',
+    options: [
+      { value: 'skull', label: 'Skull' },
+      { value: 'orcSkull', label: 'Orc Skull' },
+      { value: 'crossedBones', label: 'Crossed Bones' },
+    ],
+  },
+  {
+    label: 'Faction Symbols',
+    options: [
+      { value: 'chaosStar', label: 'Chaos Star (Chaos)' },
+      { value: 'dwarfHammer', label: 'Rune Hammer (Dwarfs)' },
+      { value: 'phoenix', label: 'Phoenix (High Elves)' },
+      { value: 'leaf', label: 'Leaf (Wood Elves)' },
+      { value: 'ratClaw', label: 'Rat Claw (Skaven)' },
+      { value: 'vampireBat', label: 'Bat (Vampire Counts)' },
+      { value: 'comet', label: 'Twin-Tailed Comet (Empire)' },
+      { value: 'fleurDeLis', label: 'Fleur-de-Lis (Bretonnia)' },
+      { value: 'ankh', label: 'Ankh (Tomb Kings)' },
+      { value: 'sunDisc', label: 'Sun Disc (Lizardmen)' },
+      { value: 'spider', label: 'Spider (Dark Elves)' },
+    ],
+  },
 ];
 
 export function defaultUnit(faction: string, colorMajor: string, colorMinor = '#e8e8e8'): Unit {
@@ -77,7 +116,7 @@ export function defaultUnit(faction: string, colorMajor: string, colorMinor = '#
     colorMajor,
     colorMinor,
     colorScheme: 'solid',
-    unitType: 'infantry',
+    icon: 'infantry',
     baseWidthMm: 25,
     baseDepthMm: 25,
     ranks: 1,
@@ -91,11 +130,11 @@ export function defaultUnit(faction: string, colorMajor: string, colorMinor = '#
   };
 }
 
-// Backfills units saved before colour/unit-type fields existed.
-export function normalizeUnit(unit: Partial<Unit> & { color?: string }): Unit {
-  const { color, ...rest } = unit;
+// Backfills units saved before colour/unit-type/icon fields existed.
+export function normalizeUnit(unit: Partial<Unit> & { color?: string; unitType?: IconType }): Unit {
+  const { color, unitType, ...rest } = unit;
   const base = defaultUnit(unit.faction ?? 'Faction', unit.colorMajor ?? color ?? FACTION_COLORS[0].hex);
-  return { ...base, ...rest };
+  return { ...base, icon: unitType ?? base.icon, ...rest };
 }
 
 export function defaultTerrain(centerX: number, centerY: number): Terrain {
