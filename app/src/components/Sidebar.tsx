@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { BoardState, ColorScheme, DeploymentZones, IconType, Selection, Terrain, Unit } from '../types';
 import { BOARD_PRESETS, COLOR_SCHEMES, FACTION_COLORS, ICON_GROUPS, TERRAIN_COLORS, isMarchingColumn, remainingMoveIn } from '../units';
+import Credits from './Credits';
 import NumberField from './NumberField';
 
 function swatchBackground(major: string, minor: string, scheme: ColorScheme): string {
@@ -579,25 +580,7 @@ export default function Sidebar({
 
       <section className="credits">
         <h3>Credits</h3>
-        <p className="credits-text">
-          Unit icons by{' '}
-          <a href="https://lorcblog.blogspot.com" target="_blank" rel="noopener noreferrer">
-            Lorc
-          </a>
-          ,{' '}
-          <a href="https://delapouite.com" target="_blank" rel="noopener noreferrer">
-            Delapouite
-          </a>
-          , and Kier Heyl, available on{' '}
-          <a href="https://game-icons.net" target="_blank" rel="noopener noreferrer">
-            game-icons.net
-          </a>
-          , licensed under{' '}
-          <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener noreferrer">
-            CC BY 3.0
-          </a>
-          .
-        </p>
+        <Credits />
       </section>
     </div>
   );
