@@ -93,7 +93,7 @@ export interface Unit {
   notes: string;
 }
 
-export type TerrainShape = 'rect' | 'circle';
+export type TerrainShape = 'rect' | 'circle' | 'forest';
 
 export interface Terrain {
   id: string;
