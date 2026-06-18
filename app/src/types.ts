@@ -150,3 +150,17 @@ export type Selection = { type: 'unit' | 'terrain'; id: string };
 
 export type Mode = 'select' | 'measure';
 
+export interface Battle {
+  id: string;
+  name: string;
+  notes: string;
+  board: BoardState;
+}
+
+export interface Campaign {
+  id: string;
+  name: string;
+  notes: string;
+  battles: Battle[];
+}
+
