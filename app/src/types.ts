@@ -157,10 +157,29 @@ export interface Battle {
   board: BoardState;
 }
 
+export type SiteType = 'city' | 'town' | 'fortress' | 'ruins' | 'mountain' | 'forest' | 'river' | 'landmark';
+
+export interface CampaignSite {
+  id: string;
+  name: string;
+  type: SiteType;
+  x: number; // percent across the map, 0-100
+  y: number; // percent down the map, 0-100
+  notes: string;
+}
+
+export interface CampaignMap {
+  id: string;
+  name: string;
+  region: string;
+  sites: CampaignSite[];
+}
+
 export interface Campaign {
   id: string;
   name: string;
   notes: string;
   battles: Battle[];
+  map: CampaignMap;
 }
 

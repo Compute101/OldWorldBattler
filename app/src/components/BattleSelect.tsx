@@ -8,9 +8,10 @@ interface Props {
   onAdd: (name: string) => void;
   onRename: (id: string, name: string) => void;
   onDelete: (id: string) => void;
+  onViewMap: () => void;
 }
 
-export default function BattleSelect({ campaign, onBack, onSelect, onAdd, onRename, onDelete }: Props) {
+export default function BattleSelect({ campaign, onBack, onSelect, onAdd, onRename, onDelete, onViewMap }: Props) {
   const [newName, setNewName] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingText, setEditingText] = useState('');
@@ -46,6 +47,9 @@ export default function BattleSelect({ campaign, onBack, onSelect, onAdd, onRena
           ← Campaigns
         </button>
         <h1>{campaign.name}</h1>
+        <button className="picker-map-btn" onClick={onViewMap}>
+          🗺 Campaign Map ({campaign.map.sites.length} site{campaign.map.sites.length === 1 ? '' : 's'})
+        </button>
         <p className="picker-subtitle">Choose a battle</p>
 
         {campaign.battles.length === 0 && (
