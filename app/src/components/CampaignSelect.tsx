@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { Campaign } from '../types';
+import Credits from './Credits';
 
 interface Props {
   campaigns: Campaign[];
@@ -91,6 +92,10 @@ export default function CampaignSelect({ campaigns, onSelect, onAdd, onRename, o
           />
           <button onClick={handleAdd}>+ New Campaign</button>
         </div>
+
+        <footer className="picker-credits">
+          <Credits />
+        </footer>
       </div>
     </div>
   );

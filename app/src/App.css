@@ -538,6 +538,12 @@
   background: #3a3d4a;
 }
 
+.picker-credits {
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid #2e303a;
+}
+
 @media (max-width: 768px) {
   .sidebar {
     position: fixed;
