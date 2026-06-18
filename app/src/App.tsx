@@ -16,6 +16,7 @@ import {
   normalizeCampaign,
   snapshotUnits,
 } from './units';
+import { GLOBAL_CAMPAIGNS } from './data/globalCampaigns';
 import type { BoardState, Campaign, LogEntry, Mode, Selection, Terrain, Unit } from './types';
 import './App.css';
 
@@ -65,11 +66,12 @@ function App() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(campaigns));
   }, [campaigns]);
 
-  const activeCampaign = campaigns.find((c) => c.id === activeCampaignId) ?? null;
+  const allCampaigns = [...GLOBAL_CAMPAIGNS, ...campaigns];
+  const activeCampaign = allCampaigns.find((c) => c.id === activeCampaignId) ?? null;
   const activeBattle = activeCampaign?.battles.find((b) => b.id === activeBattleId) ?? null;
 
   function updateBoard(updater: (b: BoardState) => BoardState) {
-    if (!activeCampaignId || !activeBattleId) return;
+    if (!activeCampaignId || !activeBattleId || activeCampaign?.readOnly) return;
     setCampaigns((cs) =>
       cs.map((c) =>
         c.id !== activeCampaignId
@@ -102,8 +104,38 @@ function App() {
     setView('battles');
   }
 
+  function handleExportCampaign(id: string) {
+    const campaign = allCampaigns.find((c) => c.id === id);
+    if (!campaign) return;
+    const exportable: Campaign = { ...campaign };
+    delete exportable.readOnly;
+    const json = JSON.stringify(exportable, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const slug = campaign.name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    a.download = `${slug || 'campaign'}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function handleImportCampaign(file: File) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(reader.result as string) as Partial<Campaign>;
+        const campaign = { ...normalizeCampaign(data), id: makeId('campaign'), readOnly: false };
+        setCampaigns((cs) => [...cs, campaign]);
+      } catch {
+        alert('Invalid campaign JSON file');
+      }
+    };
+    reader.readAsText(file);
+  }
+
   function handleAddBattle(name: string) {
-    if (!activeCampaignId) return;
+    if (!activeCampaignId || activeCampaign?.readOnly) return;
     const battle = defaultBattle(name);
     setCampaigns((cs) =>
       cs.map((c) => (c.id === activeCampaignId ? { ...c, battles: [...c.battles, battle] } : c)),
@@ -114,6 +146,7 @@ function App() {
   }
 
   function handleRenameBattle(id: string, name: string) {
+    if (activeCampaign?.readOnly) return;
     setCampaigns((cs) =>
       cs.map((c) =>
         c.id !== activeCampaignId
@@ -124,6 +157,7 @@ function App() {
   }
 
   function handleDeleteBattle(id: string) {
+    if (activeCampaign?.readOnly) return;
     setCampaigns((cs) =>
       cs.map((c) =>
         c.id !== activeCampaignId ? c : { ...c, battles: c.battles.filter((b) => b.id !== id) },
@@ -285,11 +319,13 @@ function App() {
   if (view === 'campaigns' || !activeCampaign) {
     return (
       <CampaignSelect
-        campaigns={campaigns}
+        campaigns={allCampaigns}
         onSelect={handleSelectCampaign}
         onAdd={handleAddCampaign}
         onRename={handleRenameCampaign}
         onDelete={handleDeleteCampaign}
+        onExport={handleExportCampaign}
+        onImportFile={handleImportCampaign}
       />
     );
   }
@@ -303,6 +339,7 @@ function App() {
         onAdd={handleAddBattle}
         onRename={handleRenameBattle}
         onDelete={handleDeleteBattle}
+        readOnly={activeCampaign.readOnly}
       />
     );
   }
@@ -335,6 +372,7 @@ function App() {
         onEndTurn={handleEndTurn}
         onAddLogNote={handleAddLogNote}
         onRemoveLogEntry={handleRemoveLogEntry}
+        readOnly={activeCampaign.readOnly}
       />
       {sidebarOpen && <div className="sidebar-backdrop" onClick={() => setSidebarOpen(false)} />}
       <div className="main">
@@ -343,6 +381,7 @@ function App() {
           onImport={handleImport}
           breadcrumb={`${activeCampaign.name} / ${activeBattle.name}`}
           onBack={handleBackToBattles}
+          readOnly={activeCampaign.readOnly}
         />
         <div className="view-controls">
           <button className="sidebar-toggle" onClick={() => setSidebarOpen(true)}>

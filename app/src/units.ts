@@ -297,6 +297,7 @@ export function normalizeCampaign(campaign: Partial<Campaign>): Campaign {
     ...defaultCampaign(campaign.name ?? 'Campaign'),
     ...campaign,
     battles: (campaign.battles ?? []).map(normalizeBattle),
+    readOnly: campaign.readOnly === true,
   };
 }
 

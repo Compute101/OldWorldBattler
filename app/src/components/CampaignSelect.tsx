@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import type { Campaign } from '../types';
 import Credits from './Credits';
 
@@ -8,18 +8,39 @@ interface Props {
   onAdd: (name: string) => void;
   onRename: (id: string, name: string) => void;
   onDelete: (id: string) => void;
+  onExport: (id: string) => void;
+  onImportFile: (file: File) => void;
 }
 
-export default function CampaignSelect({ campaigns, onSelect, onAdd, onRename, onDelete }: Props) {
+export default function CampaignSelect({
+  campaigns,
+  onSelect,
+  onAdd,
+  onRename,
+  onDelete,
+  onExport,
+  onImportFile,
+}: Props) {
   const [newName, setNewName] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingText, setEditingText] = useState('');
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   function handleAdd() {
     const name = newName.trim();
     if (!name) return;
     onAdd(name);
     setNewName('');
+  }
+
+  function handleImportClick() {
+    fileInputRef.current?.click();
+  }
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (file) onImportFile(file);
+    e.target.value = '';
   }
 
   function startRename(c: Campaign) {
@@ -64,18 +85,28 @@ export default function CampaignSelect({ campaigns, onSelect, onAdd, onRename, o
                 />
               ) : (
                 <button className="picker-item-main" onClick={() => onSelect(c.id)}>
-                  <span className="picker-item-name">{c.name}</span>
+                  <span className="picker-item-name">
+                    {c.name}
+                    {c.readOnly && <span className="picker-badge">Global</span>}
+                  </span>
                   <span className="picker-item-meta">
                     {c.battles.length} battle{c.battles.length === 1 ? '' : 's'}
                   </span>
                 </button>
               )}
-              <button className="picker-icon-btn" title="Rename" onClick={() => startRename(c)}>
-                ✎
+              {!c.readOnly && (
+                <button className="picker-icon-btn" title="Rename" onClick={() => startRename(c)}>
+                  ✎
+                </button>
+              )}
+              <button className="picker-icon-btn" title="Export campaign as JSON" onClick={() => onExport(c.id)}>
+                ⬇
               </button>
-              <button className="picker-icon-btn danger" title="Delete" onClick={() => handleDelete(c)}>
-                ✕
-              </button>
+              {!c.readOnly && (
+                <button className="picker-icon-btn danger" title="Delete" onClick={() => handleDelete(c)}>
+                  ✕
+                </button>
+              )}
             </li>
           ))}
         </ul>
@@ -91,6 +122,17 @@ export default function CampaignSelect({ campaigns, onSelect, onAdd, onRename, o
             }}
           />
           <button onClick={handleAdd}>+ New Campaign</button>
+        </div>
+
+        <div className="picker-add-row">
+          <button onClick={handleImportClick}>Import Campaign JSON</button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="application/json"
+            style={{ display: 'none' }}
+            onChange={handleFileChange}
+          />
         </div>
 
         <footer className="picker-credits">
