@@ -6,9 +6,10 @@ interface Props {
   onImport: (board: BoardState) => void;
   breadcrumb: string;
   onBack: () => void;
+  readOnly?: boolean;
 }
 
-export default function Toolbar({ board, onImport, breadcrumb, onBack }: Props) {
+export default function Toolbar({ board, onImport, breadcrumb, onBack, readOnly = false }: Props) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   function handleExport() {
@@ -50,16 +51,21 @@ export default function Toolbar({ board, onImport, breadcrumb, onBack }: Props) 
     <div className="toolbar">
       <button onClick={onBack}>← Battles</button>
       <span className="toolbar-breadcrumb">{breadcrumb}</span>
+      {readOnly && <span className="toolbar-readonly-badge">Read-only</span>}
       <button onClick={handleExport}>Export JSON</button>
       <button onClick={handleCopy}>Copy JSON</button>
-      <button onClick={handleImportClick}>Import JSON</button>
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="application/json"
-        style={{ display: 'none' }}
-        onChange={handleFileChange}
-      />
+      {!readOnly && (
+        <>
+          <button onClick={handleImportClick}>Import JSON</button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="application/json"
+            style={{ display: 'none' }}
+            onChange={handleFileChange}
+          />
+        </>
+      )}
     </div>
   );
 }

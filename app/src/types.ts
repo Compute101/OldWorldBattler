@@ -162,5 +162,7 @@ export interface Campaign {
   name: string;
   notes: string;
   battles: Battle[];
+  // true for campaigns bundled with the app (src/data/globalCampaigns) - viewable by everyone, editable by no one
+  readOnly?: boolean;
 }
 
