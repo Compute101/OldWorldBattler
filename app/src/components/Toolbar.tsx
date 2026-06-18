@@ -4,9 +4,11 @@ import type { BoardState } from '../types';
 interface Props {
   board: BoardState;
   onImport: (board: BoardState) => void;
+  breadcrumb: string;
+  onBack: () => void;
 }
 
-export default function Toolbar({ board, onImport }: Props) {
+export default function Toolbar({ board, onImport, breadcrumb, onBack }: Props) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   function handleExport() {
@@ -46,6 +48,8 @@ export default function Toolbar({ board, onImport }: Props) {
 
   return (
     <div className="toolbar">
+      <button onClick={onBack}>← Battles</button>
+      <span className="toolbar-breadcrumb">{breadcrumb}</span>
       <button onClick={handleExport}>Export JSON</button>
       <button onClick={handleCopy}>Copy JSON</button>
       <button onClick={handleImportClick}>Import JSON</button>

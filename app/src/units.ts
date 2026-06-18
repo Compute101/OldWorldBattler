@@ -1,4 +1,4 @@
-import type { BoardState, ColorScheme, IconType, Terrain, Unit, UnitTransform } from './types';
+import type { Battle, BoardState, Campaign, ColorScheme, IconType, Terrain, Unit, UnitTransform } from './types';
 
 export const MM_PER_INCH = 25.4;
 
@@ -261,6 +261,42 @@ export function defaultBoardState(): BoardState {
     moveUsed: {},
     movementUnlocked: false,
     log: [],
+  };
+}
+
+export function normalizeBoard(board?: Partial<BoardState>): BoardState {
+  const merged = { ...defaultBoardState(), ...board };
+  return { ...merged, units: (merged.units ?? []).map(normalizeUnit) };
+}
+
+export function defaultBattle(name = 'New Battle'): Battle {
+  return {
+    id: makeId('battle'),
+    name,
+    notes: '',
+    board: defaultBoardState(),
+  };
+}
+
+// Backfills battles saved before the campaign/battle structure existed.
+export function normalizeBattle(battle: Partial<Battle>): Battle {
+  return { ...defaultBattle(battle.name ?? 'Battle'), ...battle, board: normalizeBoard(battle.board) };
+}
+
+export function defaultCampaign(name = 'New Campaign'): Campaign {
+  return {
+    id: makeId('campaign'),
+    name,
+    notes: '',
+    battles: [],
+  };
+}
+
+export function normalizeCampaign(campaign: Partial<Campaign>): Campaign {
+  return {
+    ...defaultCampaign(campaign.name ?? 'Campaign'),
+    ...campaign,
+    battles: (campaign.battles ?? []).map(normalizeBattle),
   };
 }
 
