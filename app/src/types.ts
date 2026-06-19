@@ -132,6 +132,18 @@ export interface LogEntry {
   note: string;
 }
 
+// 'turn' steps are captured automatically (battle start, end of turn); 'sub'
+// steps are checkpoints the user adds within a turn for finer-grained replay.
+export type HistoryStepKind = 'turn' | 'sub';
+
+export interface HistoryStep {
+  id: string;
+  turn: number;
+  kind: HistoryStepKind;
+  label: string;
+  transforms: Record<string, UnitTransform>;
+}
+
 export interface BoardState {
   widthIn: number;
   heightIn: number;
@@ -144,6 +156,7 @@ export interface BoardState {
   moveUsed: Record<string, number>; // inches of movement used this turn, per unit
   movementUnlocked: boolean; // override to ignore movement-allowance limits
   log: LogEntry[];
+  history: HistoryStep[];
 }
 
 export type Selection = { type: 'unit' | 'terrain'; id: string };
