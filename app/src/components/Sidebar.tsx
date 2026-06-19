@@ -499,6 +499,7 @@ export default function Sidebar({
             >
               <option value="rect">Rectangle</option>
               <option value="circle">Circle</option>
+              <option value="forest">Forest (trees)</option>
             </select>
           </label>
           <label>
@@ -524,7 +525,7 @@ export default function Sidebar({
                 onChange={(n) => onUpdateTerrain(selectedTerrain.id, { widthIn: n })}
               />
             </label>
-            {selectedTerrain.shape === 'rect' && (
+            {selectedTerrain.shape !== 'circle' && (
               <label>
                 Depth (in)
                 <NumberField
@@ -554,7 +555,7 @@ export default function Sidebar({
               />
             </label>
           </div>
-          {selectedTerrain.shape === 'rect' && (
+          {selectedTerrain.shape !== 'circle' && (
             <label>
               Rotation
               <div className="facing-controls">
