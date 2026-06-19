@@ -8,6 +8,7 @@ interface Props {
   onAdd: (name: string) => void;
   onRename: (id: string, name: string) => void;
   onDelete: (id: string) => void;
+  onViewMap: () => void;
   readOnly?: boolean;
 }
 
@@ -18,6 +19,7 @@ export default function BattleSelect({
   onAdd,
   onRename,
   onDelete,
+  onViewMap,
   readOnly = false,
 }: Props) {
   const [newName, setNewName] = useState('');
@@ -55,6 +57,9 @@ export default function BattleSelect({
           ← Campaigns
         </button>
         <h1>{campaign.name}</h1>
+        <button className="picker-map-btn" onClick={onViewMap}>
+          🗺 Campaign Map ({campaign.map.sites.length} site{campaign.map.sites.length === 1 ? '' : 's'})
+        </button>
         <p className="picker-subtitle">Choose a battle</p>
 
         {readOnly && <p className="sidebar-readonly-note">Global campaign — view only</p>}

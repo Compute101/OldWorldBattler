@@ -627,13 +627,162 @@
   background: #3a3d4a;
 }
 
+.picker-map-select {
+  flex-shrink: 0;
+  padding: 8px 10px;
+  background: #1f2028;
+  border: 1px solid #2e303a;
+  border-radius: 4px;
+  color: #e8e8e8;
+}
+
+.picker-map-btn {
+  display: block;
+  width: 100%;
+  margin-bottom: 16px;
+  padding: 10px 14px;
+  background: #1f2028;
+  border: 1px solid #2e303a;
+  border-radius: 6px;
+  color: #e8e8e8;
+  cursor: pointer;
+  text-align: left;
+  font-size: 14px;
+}
+
+.picker-map-btn:hover {
+  background: #2e303a;
+  border-color: #3a3d4a;
+}
+
 .picker-credits {
   margin-top: 32px;
   padding-top: 16px;
   border-top: 1px solid #2e303a;
 }
 
+.map-screen {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.map-panel {
+  width: 320px;
+  flex-shrink: 0;
+  background: #16171d;
+  border-right: 1px solid #2e303a;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.map-panel h2 {
+  margin: 0 0 16px;
+  font-size: 20px;
+}
+
+.map-panel h3 {
+  margin: 16px 0 8px;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #9ca3af;
+}
+
+.map-panel section {
+  margin-bottom: 16px;
+}
+
+.map-panel label {
+  display: block;
+  font-size: 13px;
+  color: #9ca3af;
+  margin-bottom: 8px;
+}
+
+.map-panel input,
+.map-panel select,
+.map-panel textarea {
+  display: block;
+  width: 100%;
+  margin-top: 4px;
+  padding: 6px 8px;
+  background: #1f2028;
+  border: 1px solid #2e303a;
+  border-radius: 4px;
+  color: #e8e8e8;
+}
+
+.map-panel textarea {
+  min-height: 60px;
+  resize: vertical;
+}
+
+.map-panel .row {
+  display: flex;
+  gap: 8px;
+}
+
+.map-panel .row > label {
+  flex: 1;
+}
+
+.map-panel button {
+  padding: 6px 12px;
+  background: #2e303a;
+  border: 1px solid #3a3d4a;
+  border-radius: 4px;
+  color: #e8e8e8;
+  cursor: pointer;
+}
+
+.map-panel button:hover {
+  background: #3a3d4a;
+}
+
+.map-panel button.danger {
+  margin-top: 12px;
+  background: #5c1f1f;
+  border-color: #7a2c2c;
+}
+
+.map-panel button.danger:hover {
+  background: #7a2c2c;
+}
+
+.map-panel .unit-editor {
+  border-top: 1px solid #2e303a;
+  padding-top: 12px;
+}
+
+.map-wrap {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  padding: 12px;
+}
+
+.map-svg {
+  width: 100%;
+  height: 100%;
+  background: #111;
+  border: 1px solid #2e303a;
+  touch-action: none;
+}
+
 @media (max-width: 768px) {
+  .map-screen {
+    flex-direction: column;
+  }
+
+  .map-panel {
+    width: auto;
+    max-height: 50vh;
+    border-right: none;
+    border-bottom: 1px solid #2e303a;
+  }
+
+
   .sidebar {
     position: fixed;
     top: 0;

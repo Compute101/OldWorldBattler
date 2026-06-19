@@ -4,6 +4,7 @@ import Sidebar from './components/Sidebar';
 import Toolbar from './components/Toolbar';
 import CampaignSelect from './components/CampaignSelect';
 import BattleSelect from './components/BattleSelect';
+import CampaignMapView from './components/CampaignMapView';
 import ReplayView from './components/ReplayView';
 import {
   FACTION_COLORS,
@@ -19,7 +20,7 @@ import {
   snapshotUnits,
 } from './units';
 import { GLOBAL_CAMPAIGNS } from './data/globalCampaigns';
-import type { BoardState, Campaign, LogEntry, Mode, Selection, Terrain, Unit } from './types';
+import type { BoardState, Campaign, CampaignMap, LogEntry, Mode, Selection, Terrain, Unit } from './types';
 import './App.css';
 
 const STORAGE_KEY = 'oldworldbattler-campaigns';
@@ -52,7 +53,7 @@ function loadCampaigns(): Campaign[] {
   return [];
 }
 
-type View = 'campaigns' | 'battles' | 'board' | 'replay';
+type View = 'campaigns' | 'battles' | 'map' | 'board' | 'replay';
 
 function App() {
   const [campaigns, setCampaigns] = useState<Campaign[]>(loadCampaigns);
@@ -86,8 +87,8 @@ function App() {
     );
   }
 
-  function handleAddCampaign(name: string) {
-    const campaign = defaultCampaign(name);
+  function handleAddCampaign(name: string, mapTemplateKey?: string) {
+    const campaign = defaultCampaign(name, mapTemplateKey);
     setCampaigns((cs) => [...cs, campaign]);
     setActiveCampaignId(campaign.id);
     setView('battles');
@@ -171,6 +172,15 @@ function App() {
     setActiveBattleId(id);
     setSelection(null);
     setView('board');
+  }
+
+  function handleViewMap() {
+    setView('map');
+  }
+
+  function handleUpdateMap(updater: (m: CampaignMap) => CampaignMap) {
+    if (!activeCampaignId) return;
+    setCampaigns((cs) => cs.map((c) => (c.id !== activeCampaignId ? c : { ...c, map: updater(c.map) })));
   }
 
   function handleBackToCampaigns() {
@@ -355,6 +365,17 @@ function App() {
     );
   }
 
+  if (view === 'map') {
+    return (
+      <CampaignMapView
+        campaign={activeCampaign}
+        onBack={handleBackToBattles}
+        onUpdateMap={handleUpdateMap}
+        readOnly={activeCampaign.readOnly}
+      />
+    );
+  }
+
   if (view === 'battles' || !activeBattle) {
     return (
       <BattleSelect
@@ -364,6 +385,7 @@ function App() {
         onAdd={handleAddBattle}
         onRename={handleRenameBattle}
         onDelete={handleDeleteBattle}
+        onViewMap={handleViewMap}
         readOnly={activeCampaign.readOnly}
       />
     );

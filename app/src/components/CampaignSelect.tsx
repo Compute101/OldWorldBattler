@@ -1,11 +1,12 @@
 import { useRef, useState } from 'react';
 import type { Campaign } from '../types';
+import { MAP_TEMPLATES } from '../maps';
 import Credits from './Credits';
 
 interface Props {
   campaigns: Campaign[];
   onSelect: (id: string) => void;
-  onAdd: (name: string) => void;
+  onAdd: (name: string, mapTemplateKey?: string) => void;
   onRename: (id: string, name: string) => void;
   onDelete: (id: string) => void;
   onExport: (id: string) => void;
@@ -22,6 +23,7 @@ export default function CampaignSelect({
   onImportFile,
 }: Props) {
   const [newName, setNewName] = useState('');
+  const [newMapKey, setNewMapKey] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingText, setEditingText] = useState('');
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -29,8 +31,9 @@ export default function CampaignSelect({
   function handleAdd() {
     const name = newName.trim();
     if (!name) return;
-    onAdd(name);
+    onAdd(name, newMapKey || undefined);
     setNewName('');
+    setNewMapKey('');
   }
 
   function handleImportClick() {
@@ -121,6 +124,19 @@ export default function CampaignSelect({
               if (e.key === 'Enter') handleAdd();
             }}
           />
+          <select
+            className="picker-map-select"
+            value={newMapKey}
+            onChange={(e) => setNewMapKey(e.target.value)}
+            aria-label="Starting campaign map"
+          >
+            <option value="">Blank map</option>
+            {MAP_TEMPLATES.map((t) => (
+              <option key={t.key} value={t.key}>
+                {t.label}
+              </option>
+            ))}
+          </select>
           <button onClick={handleAdd}>+ New Campaign</button>
         </div>
 

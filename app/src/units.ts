@@ -10,6 +10,10 @@ import type {
   Unit,
   UnitTransform,
 } from './types';
+import { defaultCampaignMap, normalizeCampaignMap } from './maps';
+import { makeId } from './id';
+
+export { makeId };
 
 export const MM_PER_INCH = 25.4;
 
@@ -18,11 +22,6 @@ export function footprintInches(unit: Unit): { widthIn: number; depthIn: number 
     widthIn: (unit.files * unit.baseWidthMm) / MM_PER_INCH,
     depthIn: (unit.ranks * unit.baseDepthMm) / MM_PER_INCH,
   };
-}
-
-let nextId = 1;
-export function makeId(prefix = 'unit'): string {
-  return `${prefix}-${Date.now()}-${nextId++}`;
 }
 
 export const FACTION_COLORS: { name: string; hex: string }[] = [
@@ -359,20 +358,23 @@ export function normalizeBattle(battle: Partial<Battle>): Battle {
   return { ...defaultBattle(battle.name ?? 'Battle'), ...battle, board: normalizeBoard(battle.board) };
 }
 
-export function defaultCampaign(name = 'New Campaign'): Campaign {
+export function defaultCampaign(name = 'New Campaign', mapTemplateKey?: string): Campaign {
   return {
     id: makeId('campaign'),
     name,
     notes: '',
     battles: [],
+    map: defaultCampaignMap(mapTemplateKey),
   };
 }
 
+// Backfills campaigns saved before campaign maps existed.
 export function normalizeCampaign(campaign: Partial<Campaign>): Campaign {
   return {
     ...defaultCampaign(campaign.name ?? 'Campaign'),
     ...campaign,
     battles: (campaign.battles ?? []).map(normalizeBattle),
+    map: normalizeCampaignMap(campaign.map),
     readOnly: campaign.readOnly === true,
   };
 }
