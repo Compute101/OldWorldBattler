@@ -1,6 +1,6 @@
-import { useRef } from 'react';
+import { useMemo, useRef } from 'react';
 import type { Terrain } from '../types';
-import { normalizeAngle, screenToBoardPoint } from '../units';
+import { forestClumps, normalizeAngle, screenToBoardPoint, shadeHex } from '../units';
 
 interface Props {
   terrain: Terrain;
@@ -72,6 +72,9 @@ export default function TerrainToken({ terrain, selected, onSelect, onMove, onRo
   }
 
   const handleSize = Math.max(0.25, Math.min(terrain.widthIn, terrain.depthIn || terrain.widthIn) * 0.12);
+  const rx = terrain.widthIn / 2;
+  const ry = (terrain.depthIn || terrain.widthIn) / 2;
+  const clumps = useMemo(() => forestClumps(terrain.id), [terrain.id]);
 
   const shapeEl =
     terrain.shape === 'circle' ? (
@@ -80,11 +83,33 @@ export default function TerrainToken({ terrain, selected, onSelect, onMove, onRo
         cy={0}
         r={terrain.widthIn / 2}
         fill={terrain.color}
-        fillOpacity={0.6}
         stroke={selected ? '#ffffff' : '#000000'}
-        strokeWidth={selected ? 0.15 : 0.05}
-        strokeDasharray="0.4 0.3"
+        strokeWidth={selected ? 0.15 : 0.08}
       />
+    ) : terrain.shape === 'forest' ? (
+      <g>
+        <ellipse
+          cx={0}
+          cy={0}
+          rx={rx}
+          ry={ry}
+          fill={shadeHex(terrain.color, -0.2)}
+          stroke={selected ? '#ffffff' : '#000000'}
+          strokeWidth={selected ? 0.15 : 0.08}
+        />
+        {clumps.map((c, i) => (
+          <circle
+            key={i}
+            cx={c.dx * rx}
+            cy={c.dy * ry}
+            r={c.r * Math.min(rx, ry)}
+            fill={shadeHex(terrain.color, c.shade * 0.35)}
+            stroke="#1a2410"
+            strokeOpacity={0.4}
+            strokeWidth={0.03}
+          />
+        ))}
+      </g>
     ) : (
       <rect
         x={-terrain.widthIn / 2}
@@ -92,10 +117,8 @@ export default function TerrainToken({ terrain, selected, onSelect, onMove, onRo
         width={terrain.widthIn}
         height={terrain.depthIn}
         fill={terrain.color}
-        fillOpacity={0.6}
         stroke={selected ? '#ffffff' : '#000000'}
-        strokeWidth={selected ? 0.15 : 0.05}
-        strokeDasharray="0.4 0.3"
+        strokeWidth={selected ? 0.15 : 0.08}
       />
     );
 
@@ -121,7 +144,7 @@ export default function TerrainToken({ terrain, selected, onSelect, onMove, onRo
         {terrain.name}
       </text>
 
-      {selected && !locked && terrain.shape === 'rect' && (
+      {selected && !locked && terrain.shape !== 'circle' && (
         <>
           <line
             x1={0}
