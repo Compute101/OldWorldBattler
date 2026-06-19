@@ -4,6 +4,7 @@ import Sidebar from './components/Sidebar';
 import Toolbar from './components/Toolbar';
 import CampaignSelect from './components/CampaignSelect';
 import BattleSelect from './components/BattleSelect';
+import ReplayView from './components/ReplayView';
 import {
   FACTION_COLORS,
   angleDiff,
@@ -11,6 +12,7 @@ import {
   defaultCampaign,
   defaultTerrain,
   defaultUnit,
+  makeHistoryStep,
   makeId,
   normalizeBoard,
   normalizeCampaign,
@@ -50,7 +52,7 @@ function loadCampaigns(): Campaign[] {
   return [];
 }
 
-type View = 'campaigns' | 'battles' | 'board';
+type View = 'campaigns' | 'battles' | 'board' | 'replay';
 
 function App() {
   const [campaigns, setCampaigns] = useState<Campaign[]>(loadCampaigns);
@@ -260,6 +262,7 @@ function App() {
       turnStart: snapshotUnits(b.units),
       moveUsed: {},
       log: [],
+      history: [makeHistoryStep(1, 'turn', 'Turn 1', b.units)],
     }));
   }
 
@@ -286,12 +289,14 @@ function App() {
           note: '',
         });
       }
+      const nextTurn = b.turn + 1;
       return {
         ...b,
-        turn: b.turn + 1,
+        turn: nextTurn,
         turnStart: snapshotUnits(b.units),
         moveUsed: {},
         log: [...b.log, ...entries],
+        history: [...b.history, makeHistoryStep(nextTurn, 'turn', `Turn ${nextTurn}`, b.units)],
       };
     });
   }
@@ -314,6 +319,26 @@ function App() {
 
   function handleRemoveLogEntry(id: string) {
     updateBoard((b) => ({ ...b, log: b.log.filter((e) => e.id !== id) }));
+  }
+
+  function handleAddSubTurn(label: string) {
+    updateBoard((b) => ({
+      ...b,
+      history: [...b.history, makeHistoryStep(b.turn, 'sub', label.trim() || 'Sub-turn', b.units)],
+    }));
+  }
+
+  function handleRemoveHistoryStep(id: string) {
+    updateBoard((b) => ({ ...b, history: b.history.filter((h) => h.id !== id) }));
+  }
+
+  function handleEnterReplay() {
+    setSelection(null);
+    setView('replay');
+  }
+
+  function handleExitReplay() {
+    setView('board');
   }
 
   if (view === 'campaigns' || !activeCampaign) {
@@ -340,6 +365,16 @@ function App() {
         onRename={handleRenameBattle}
         onDelete={handleDeleteBattle}
         readOnly={activeCampaign.readOnly}
+      />
+    );
+  }
+
+  if (view === 'replay') {
+    return (
+      <ReplayView
+        board={activeBattle.board}
+        breadcrumb={`${activeCampaign.name} / ${activeBattle.name}`}
+        onExit={handleExitReplay}
       />
     );
   }
@@ -372,6 +407,9 @@ function App() {
         onEndTurn={handleEndTurn}
         onAddLogNote={handleAddLogNote}
         onRemoveLogEntry={handleRemoveLogEntry}
+        onAddSubTurn={handleAddSubTurn}
+        onRemoveHistoryStep={handleRemoveHistoryStep}
+        onEnterReplay={handleEnterReplay}
         readOnly={activeCampaign.readOnly}
       />
       {sidebarOpen && <div className="sidebar-backdrop" onClick={() => setSidebarOpen(false)} />}

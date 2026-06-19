@@ -20,6 +20,7 @@ interface Props {
   onRotateTerrain: (id: string, rotation: number) => void;
   snapIn: number;
   mode: Mode;
+  readOnly?: boolean;
 }
 
 function clamp(value: number, min: number, max: number) {
@@ -35,6 +36,7 @@ export default function Board({
   onRotateTerrain,
   snapIn,
   mode,
+  readOnly = false,
 }: Props) {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const { widthIn, heightIn, units, terrain, deploymentZones } = board;
@@ -277,7 +279,7 @@ export default function Board({
             onRotate={onRotateTerrain}
             svgRef={svgRef}
             snapIn={snapIn}
-            locked={board.phase === 'battle'}
+            locked={readOnly || board.phase === 'battle'}
           />
         ))}
         {units.map((unit) => (
@@ -291,6 +293,7 @@ export default function Board({
             snapIn={snapIn}
             phase={board.phase}
             remainingIn={remainingMoveIn(unit, board.moveUsed[unit.id] ?? 0, board.movementUnlocked)}
+            locked={readOnly}
           />
         ))}
         {measure && (

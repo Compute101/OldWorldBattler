@@ -1,4 +1,15 @@
-import type { Battle, BoardState, Campaign, ColorScheme, IconType, Terrain, Unit, UnitTransform } from './types';
+import type {
+  Battle,
+  BoardState,
+  Campaign,
+  ColorScheme,
+  HistoryStep,
+  HistoryStepKind,
+  IconType,
+  Terrain,
+  Unit,
+  UnitTransform,
+} from './types';
 
 export const MM_PER_INCH = 25.4;
 
@@ -325,6 +336,7 @@ export function defaultBoardState(): BoardState {
     moveUsed: {},
     movementUnlocked: false,
     log: [],
+    history: [],
   };
 }
 
@@ -390,4 +402,21 @@ export function snapshotUnits(units: Unit[]): Record<string, UnitTransform> {
 // Smallest signed difference (degrees) to rotate `from` into `to`, in range [-180, 180].
 export function angleDiff(from: number, to: number): number {
   return normalizeAngle(to - from + 180) - 180;
+}
+
+export function makeHistoryStep(turn: number, kind: HistoryStepKind, label: string, units: Unit[]): HistoryStep {
+  return { id: makeId('history'), turn, kind, label, transforms: snapshotUnits(units) };
+}
+
+// Interpolates between two transforms, taking the shortest path around for facing.
+export function lerpTransform(a: UnitTransform, b: UnitTransform, t: number): UnitTransform {
+  return {
+    x: a.x + (b.x - a.x) * t,
+    y: a.y + (b.y - a.y) * t,
+    facing: normalizeAngle(a.facing + angleDiff(a.facing, b.facing) * t),
+  };
+}
+
+export function easeInOutCubic(t: number): number {
+  return t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2;
 }
