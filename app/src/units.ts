@@ -80,19 +80,26 @@ export interface ForestClump {
 
 // Deterministic scatter of tree-canopy blobs within the terrain's elliptical
 // footprint, seeded by terrain id so the pattern doesn't reshuffle on drag/resize.
+// Candidates that would land too close to an already-placed blob are retried
+// (and eventually dropped) to keep canopies from piling on top of each other.
 export function forestClumps(seed: string): ForestClump[] {
   const rand = mulberry32(hashString(seed));
-  const count = 9 + Math.floor(rand() * 4);
+  const target = 6 + Math.floor(rand() * 3);
   const clumps: ForestClump[] = [];
-  for (let i = 0; i < count; i++) {
-    const angle = rand() * Math.PI * 2;
-    const dist = Math.sqrt(rand()) * 0.78;
-    clumps.push({
-      dx: Math.cos(angle) * dist,
-      dy: Math.sin(angle) * dist,
-      r: 0.3 + rand() * 0.28,
-      shade: rand() * 2 - 1,
-    });
+  const maxAttemptsPerClump = 40;
+  for (let i = 0; i < target; i++) {
+    for (let attempt = 0; attempt < maxAttemptsPerClump; attempt++) {
+      const angle = rand() * Math.PI * 2;
+      const dist = Math.sqrt(rand()) * 0.72;
+      const dx = Math.cos(angle) * dist;
+      const dy = Math.sin(angle) * dist;
+      const r = 0.18 + rand() * 0.14;
+      const tooClose = clumps.some((c) => Math.hypot(c.dx - dx, c.dy - dy) < (c.r + r) * 0.85);
+      if (!tooClose) {
+        clumps.push({ dx, dy, r, shade: rand() * 2 - 1 });
+        break;
+      }
+    }
   }
   return clumps;
 }
