@@ -35,6 +35,9 @@ interface Props {
   onEndTurn: () => void;
   onAddLogNote: (note: string, unitId: string | null) => void;
   onRemoveLogEntry: (id: string) => void;
+  onAddSubTurn: (label: string) => void;
+  onRemoveHistoryStep: (id: string) => void;
+  onEnterReplay: () => void;
 }
 
 const EDGES: DeploymentZones['edges'] = ['north', 'south', 'east', 'west'];
@@ -57,6 +60,9 @@ export default function Sidebar({
   onEndTurn,
   onAddLogNote,
   onRemoveLogEntry,
+  onAddSubTurn,
+  onRemoveHistoryStep,
+  onEnterReplay,
 }: Props) {
   const selectedUnit =
     selection?.type === 'unit' ? board.units.find((u) => u.id === selection.id) ?? null : null;
@@ -65,6 +71,7 @@ export default function Sidebar({
 
   const [noteText, setNoteText] = useState('');
   const [noteUnitId, setNoteUnitId] = useState('');
+  const [subTurnLabel, setSubTurnLabel] = useState('');
 
   function toggleEdge(edge: DeploymentZones['edges'][number]) {
     const edges = board.deploymentZones.edges.includes(edge)
@@ -78,6 +85,11 @@ export default function Sidebar({
     if (!note) return;
     onAddLogNote(note, noteUnitId || null);
     setNoteText('');
+  }
+
+  function handleAddSubTurn() {
+    onAddSubTurn(subTurnLabel.trim());
+    setSubTurnLabel('');
   }
 
   return (
@@ -107,6 +119,7 @@ export default function Sidebar({
           <div className="row">
             <button onClick={onEndTurn}>End Turn</button>
             <button onClick={onBackToSetup}>Back to Setup</button>
+            <button onClick={onEnterReplay}>▶ Replay Battle</button>
           </div>
         )}
         {board.phase === 'battle' && (
@@ -170,6 +183,40 @@ export default function Sidebar({
           </>
         )}
       </section>
+
+      {board.phase === 'battle' && (
+        <section>
+          <h3>Sub Turns</h3>
+          <div className="row">
+            <label>
+              Label
+              <input
+                type="text"
+                value={subTurnLabel}
+                onChange={(e) => setSubTurnLabel(e.target.value)}
+                placeholder="e.g. Charge reactions"
+              />
+            </label>
+            <button onClick={handleAddSubTurn}>+ Add Sub Turn</button>
+          </div>
+          <ul className="log-list">
+            {board.history
+              .slice()
+              .reverse()
+              .map((step) => (
+                <li key={step.id}>
+                  <span className="log-turn">T{step.turn}</span>
+                  <span className="log-body">{step.label}</span>
+                  {step.kind === 'sub' && (
+                    <button className="danger" onClick={() => onRemoveHistoryStep(step.id)}>
+                      ✕
+                    </button>
+                  )}
+                </li>
+              ))}
+          </ul>
+        </section>
+      )}
 
       <section>
         <h3>Board</h3>

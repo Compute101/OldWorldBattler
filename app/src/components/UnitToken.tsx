@@ -12,11 +12,22 @@ interface Props {
   snapIn: number;
   phase: Phase;
   remainingIn: number;
+  locked?: boolean;
 }
 
 type WheelCorner = 'fl' | 'fr';
 
-export default function UnitToken({ unit, selected, onSelect, onUpdate, svgRef, snapIn, phase, remainingIn }: Props) {
+export default function UnitToken({
+  unit,
+  selected,
+  onSelect,
+  onUpdate,
+  svgRef,
+  snapIn,
+  phase,
+  remainingIn,
+  locked = false,
+}: Props) {
   const { widthIn, depthIn } = footprintInches(unit);
   const dragOffset = useRef<{ dx: number; dy: number } | null>(null);
   const rotating = useRef(false);
@@ -39,6 +50,7 @@ export default function UnitToken({ unit, selected, onSelect, onUpdate, svgRef, 
   function handlePointerDown(e: React.PointerEvent) {
     e.stopPropagation();
     onSelect(unit.id);
+    if (locked) return;
     const p = toBoardPoint(e.clientX, e.clientY);
     dragOffset.current = { dx: p.x - unit.x, dy: p.y - unit.y };
     (e.target as Element).setPointerCapture(e.pointerId);
@@ -76,6 +88,7 @@ export default function UnitToken({ unit, selected, onSelect, onUpdate, svgRef, 
   function handleRotateDown(e: React.PointerEvent) {
     e.stopPropagation();
     onSelect(unit.id);
+    if (locked) return;
     rotating.current = true;
     reformCharged.current = false;
     (e.target as Element).setPointerCapture(e.pointerId);
@@ -108,6 +121,7 @@ export default function UnitToken({ unit, selected, onSelect, onUpdate, svgRef, 
   function wheelDown(corner: WheelCorner, e: React.PointerEvent) {
     e.stopPropagation();
     onSelect(unit.id);
+    if (locked) return;
     const pivotLocal = corner === 'fl' ? frLocal : flLocal;
     wheeling.current = { pivot: localToBoard(unit, pivotLocal), pivotLocal, corner };
     (e.target as Element).setPointerCapture(e.pointerId);
@@ -151,9 +165,9 @@ export default function UnitToken({ unit, selected, onSelect, onUpdate, svgRef, 
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
-      style={{ cursor: 'grab' }}
+      style={{ cursor: locked ? 'default' : 'grab' }}
     >
-      {selected && phase === 'battle' && Number.isFinite(remainingIn) && (
+      {selected && phase === 'battle' && !locked && Number.isFinite(remainingIn) && (
         <circle
           cx={0}
           cy={0}
@@ -177,7 +191,7 @@ export default function UnitToken({ unit, selected, onSelect, onUpdate, svgRef, 
         <UnitTypeIcon icon={unit.icon} size={Math.min(widthIn, depthIn) * 0.6} />
       </g>
 
-      {selected && (
+      {selected && !locked && (
         <>
           {/* rotate-in-place handle */}
           <circle
