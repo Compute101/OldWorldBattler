@@ -491,7 +491,15 @@ export default function Sidebar({
             Shape
             <select
               value={selectedTerrain.shape}
-              onChange={(e) => onUpdateTerrain(selectedTerrain.id, { shape: e.target.value as Terrain['shape'] })}
+              onChange={(e) => {
+                const shape = e.target.value as Terrain['shape'];
+                const patch: Partial<Terrain> = { shape };
+                if (shape === 'forest' && selectedTerrain.widthIn === selectedTerrain.depthIn) {
+                  patch.widthIn = selectedTerrain.widthIn * 1.6;
+                  patch.depthIn = selectedTerrain.depthIn;
+                }
+                onUpdateTerrain(selectedTerrain.id, patch);
+              }}
             >
               <option value="rect">Rectangle</option>
               <option value="circle">Circle</option>
