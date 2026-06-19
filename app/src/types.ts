@@ -93,7 +93,7 @@ export interface Unit {
   notes: string;
 }
 
-export type TerrainShape = 'rect' | 'circle';
+export type TerrainShape = 'rect' | 'circle' | 'forest';
 
 export interface Terrain {
   id: string;
@@ -181,5 +181,7 @@ export interface Campaign {
   notes: string;
   battles: Battle[];
   map: CampaignMap;
+  // true for campaigns bundled with the app (src/data/globalCampaigns) - viewable by everyone, editable by no one
+  readOnly?: boolean;
 }
 

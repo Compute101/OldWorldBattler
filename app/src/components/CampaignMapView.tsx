@@ -8,6 +8,7 @@ interface Props {
   campaign: Campaign;
   onBack: () => void;
   onUpdateMap: (updater: (map: CampaignMap) => CampaignMap) => void;
+  readOnly?: boolean;
 }
 
 function clamp(value: number, min: number, max: number) {
@@ -48,7 +49,7 @@ function SiteMarker({ site, selected }: { site: CampaignSite; selected: boolean 
   );
 }
 
-export default function CampaignMapView({ campaign, onBack, onUpdateMap }: Props) {
+export default function CampaignMapView({ campaign, onBack, onUpdateMap, readOnly = false }: Props) {
   const map = campaign.map;
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
@@ -98,6 +99,7 @@ export default function CampaignMapView({ campaign, onBack, onUpdateMap }: Props
   function handleMarkerPointerDown(e: React.PointerEvent, site: CampaignSite) {
     e.stopPropagation();
     setSelectedId(site.id);
+    if (readOnly) return;
     const p = toPercent(e.clientX, e.clientY);
     dragRef.current = { id: site.id, dx: p.x - site.x, dy: p.y - site.y };
     (e.target as Element).setPointerCapture(e.pointerId);
@@ -123,102 +125,105 @@ export default function CampaignMapView({ campaign, onBack, onUpdateMap }: Props
           ← Battles
         </button>
         <h2>{campaign.name}</h2>
-        <label>
-          Map name
-          <input
-            type="text"
-            value={map.name}
-            onChange={(e) => onUpdateMap((m) => ({ ...m, name: e.target.value }))}
-          />
-        </label>
-        <label>
-          Load a default map
-          <select value="" onChange={(e) => e.target.value && handleLoadTemplate(e.target.value)}>
-            <option value="">Choose a region…</option>
-            {MAP_TEMPLATES.map((t) => (
-              <option key={t.key} value={t.key}>
-                {t.label}
-              </option>
-            ))}
-          </select>
-        </label>
+        {readOnly && <p className="sidebar-readonly-note">Global campaign — view only</p>}
+        <fieldset className="sidebar-fieldset" disabled={readOnly}>
+          <label>
+            Map name
+            <input
+              type="text"
+              value={map.name}
+              onChange={(e) => onUpdateMap((m) => ({ ...m, name: e.target.value }))}
+            />
+          </label>
+          <label>
+            Load a default map
+            <select value="" onChange={(e) => e.target.value && handleLoadTemplate(e.target.value)}>
+              <option value="">Choose a region…</option>
+              {MAP_TEMPLATES.map((t) => (
+                <option key={t.key} value={t.key}>
+                  {t.label}
+                </option>
+              ))}
+            </select>
+          </label>
 
-        <section>
-          <h3>Sites</h3>
-          <button onClick={handleAddSite}>+ Add Site</button>
-          <ul className="unit-list">
-            {map.sites.map((s) => (
-              <li
-                key={s.id}
-                className={selectedId === s.id ? 'selected' : ''}
-                onClick={() => setSelectedId(s.id)}
-              >
-                <span className="swatch" style={{ background: siteTypeMeta(s.type).color }} />
-                {s.name} ({siteTypeMeta(s.type).label})
-              </li>
-            ))}
-          </ul>
-          {map.sites.length === 0 && (
-            <p className="picker-empty">No sites yet. Add one, or load a default map above.</p>
-          )}
-        </section>
-
-        {selected && (
-          <section className="unit-editor">
-            <h3>Edit Site</h3>
-            <label>
-              Name
-              <input
-                type="text"
-                value={selected.name}
-                onChange={(e) => handleUpdateSite(selected.id, { name: e.target.value })}
-              />
-            </label>
-            <label>
-              Type
-              <select
-                value={selected.type}
-                onChange={(e) => handleUpdateSite(selected.id, { type: e.target.value as SiteType })}
-              >
-                {SITE_TYPES.map((t) => (
-                  <option key={t.value} value={t.value}>
-                    {t.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <div className="row">
-              <label>
-                X (%)
-                <NumberField
-                  value={Number(selected.x.toFixed(1))}
-                  min={0}
-                  max={100}
-                  onChange={(n) => handleUpdateSite(selected.id, { x: n })}
-                />
-              </label>
-              <label>
-                Y (%)
-                <NumberField
-                  value={Number(selected.y.toFixed(1))}
-                  min={0}
-                  max={100}
-                  onChange={(n) => handleUpdateSite(selected.id, { y: n })}
-                />
-              </label>
-            </div>
-            <label>
-              Notes
-              <textarea
-                value={selected.notes}
-                onChange={(e) => handleUpdateSite(selected.id, { notes: e.target.value })}
-              />
-            </label>
-            <button className="danger" onClick={() => handleRemoveSite(selected.id)}>
-              Remove Site
-            </button>
+          <section>
+            <h3>Sites</h3>
+            <button onClick={handleAddSite}>+ Add Site</button>
+            <ul className="unit-list">
+              {map.sites.map((s) => (
+                <li
+                  key={s.id}
+                  className={selectedId === s.id ? 'selected' : ''}
+                  onClick={() => setSelectedId(s.id)}
+                >
+                  <span className="swatch" style={{ background: siteTypeMeta(s.type).color }} />
+                  {s.name} ({siteTypeMeta(s.type).label})
+                </li>
+              ))}
+            </ul>
+            {map.sites.length === 0 && (
+              <p className="picker-empty">No sites yet. Add one, or load a default map above.</p>
+            )}
           </section>
-        )}
+
+          {selected && (
+            <section className="unit-editor">
+              <h3>Edit Site</h3>
+              <label>
+                Name
+                <input
+                  type="text"
+                  value={selected.name}
+                  onChange={(e) => handleUpdateSite(selected.id, { name: e.target.value })}
+                />
+              </label>
+              <label>
+                Type
+                <select
+                  value={selected.type}
+                  onChange={(e) => handleUpdateSite(selected.id, { type: e.target.value as SiteType })}
+                >
+                  {SITE_TYPES.map((t) => (
+                    <option key={t.value} value={t.value}>
+                      {t.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <div className="row">
+                <label>
+                  X (%)
+                  <NumberField
+                    value={Number(selected.x.toFixed(1))}
+                    min={0}
+                    max={100}
+                    onChange={(n) => handleUpdateSite(selected.id, { x: n })}
+                  />
+                </label>
+                <label>
+                  Y (%)
+                  <NumberField
+                    value={Number(selected.y.toFixed(1))}
+                    min={0}
+                    max={100}
+                    onChange={(n) => handleUpdateSite(selected.id, { y: n })}
+                  />
+                </label>
+              </div>
+              <label>
+                Notes
+                <textarea
+                  value={selected.notes}
+                  onChange={(e) => handleUpdateSite(selected.id, { notes: e.target.value })}
+                />
+              </label>
+              <button className="danger" onClick={() => handleRemoveSite(selected.id)}>
+                Remove Site
+              </button>
+            </section>
+          )}
+        </fieldset>
       </div>
 
       <div className="map-wrap">

@@ -9,9 +9,19 @@ interface Props {
   onRename: (id: string, name: string) => void;
   onDelete: (id: string) => void;
   onViewMap: () => void;
+  readOnly?: boolean;
 }
 
-export default function BattleSelect({ campaign, onBack, onSelect, onAdd, onRename, onDelete, onViewMap }: Props) {
+export default function BattleSelect({
+  campaign,
+  onBack,
+  onSelect,
+  onAdd,
+  onRename,
+  onDelete,
+  onViewMap,
+  readOnly = false,
+}: Props) {
   const [newName, setNewName] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingText, setEditingText] = useState('');
@@ -52,6 +62,8 @@ export default function BattleSelect({ campaign, onBack, onSelect, onAdd, onRena
         </button>
         <p className="picker-subtitle">Choose a battle</p>
 
+        {readOnly && <p className="sidebar-readonly-note">Global campaign — view only</p>}
+
         {campaign.battles.length === 0 && (
           <p className="picker-empty">No battles yet. Create one below to set up the map.</p>
         )}
@@ -79,28 +91,34 @@ export default function BattleSelect({ campaign, onBack, onSelect, onAdd, onRena
                   </span>
                 </button>
               )}
-              <button className="picker-icon-btn" title="Rename" onClick={() => startRename(b)}>
-                ✎
-              </button>
-              <button className="picker-icon-btn danger" title="Delete" onClick={() => handleDelete(b)}>
-                ✕
-              </button>
+              {!readOnly && (
+                <>
+                  <button className="picker-icon-btn" title="Rename" onClick={() => startRename(b)}>
+                    ✎
+                  </button>
+                  <button className="picker-icon-btn danger" title="Delete" onClick={() => handleDelete(b)}>
+                    ✕
+                  </button>
+                </>
+              )}
             </li>
           ))}
         </ul>
 
-        <div className="picker-add-row">
-          <input
-            type="text"
-            placeholder="New battle name"
-            value={newName}
-            onChange={(e) => setNewName(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') handleAdd();
-            }}
-          />
-          <button onClick={handleAdd}>+ New Battle</button>
-        </div>
+        {!readOnly && (
+          <div className="picker-add-row">
+            <input
+              type="text"
+              placeholder="New battle name"
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleAdd();
+              }}
+            />
+            <button onClick={handleAdd}>+ New Battle</button>
+          </div>
+        )}
       </div>
     </div>
   );

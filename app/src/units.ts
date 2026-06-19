@@ -50,6 +50,70 @@ export const TERRAIN_COLORS: { name: string; hex: string }[] = [
   { name: 'Snow White', hex: '#e8edf0' },
 ];
 
+function hashString(s: string): number {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) {
+    h = (Math.imul(h, 31) + s.charCodeAt(i)) | 0;
+  }
+  return h;
+}
+
+// Small seeded PRNG (mulberry32) so per-terrain randomness is stable across renders.
+function mulberry32(seed: number): () => number {
+  let a = seed;
+  return function () {
+    a |= 0;
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+export interface ForestClump {
+  dx: number; // normalized offset from center, -1..1
+  dy: number;
+  r: number; // normalized radius, relative to the footprint's shorter half-axis
+  shade: number; // -1..1, lightens/darkens the base terrain color
+}
+
+// Deterministic scatter of tree-canopy blobs within the terrain's elliptical
+// footprint, seeded by terrain id so the pattern doesn't reshuffle on drag/resize.
+// Candidates that would land too close to an already-placed blob are retried
+// (and eventually dropped) to keep canopies from piling on top of each other.
+export function forestClumps(seed: string): ForestClump[] {
+  const rand = mulberry32(hashString(seed));
+  const target = 6 + Math.floor(rand() * 3);
+  const clumps: ForestClump[] = [];
+  const maxAttemptsPerClump = 40;
+  for (let i = 0; i < target; i++) {
+    for (let attempt = 0; attempt < maxAttemptsPerClump; attempt++) {
+      const angle = rand() * Math.PI * 2;
+      const dist = Math.sqrt(rand()) * 0.72;
+      const dx = Math.cos(angle) * dist;
+      const dy = Math.sin(angle) * dist;
+      const r = 0.18 + rand() * 0.14;
+      const tooClose = clumps.some((c) => Math.hypot(c.dx - dx, c.dy - dy) < (c.r + r) * 0.85);
+      if (!tooClose) {
+        clumps.push({ dx, dy, r, shade: rand() * 2 - 1 });
+        break;
+      }
+    }
+  }
+  return clumps;
+}
+
+// Lightens (percent > 0) or darkens (percent < 0) a hex color.
+export function shadeHex(hex: string, percent: number): string {
+  const num = parseInt(hex.replace('#', ''), 16);
+  const r = (num >> 16) & 0xff;
+  const g = (num >> 8) & 0xff;
+  const b = num & 0xff;
+  const adjust = (c: number) => (percent >= 0 ? c + (255 - c) * percent : c * (1 + percent));
+  const toHex = (c: number) => Math.max(0, Math.min(255, Math.round(c))).toString(16).padStart(2, '0');
+  return `#${toHex(adjust(r))}${toHex(adjust(g))}${toHex(adjust(b))}`;
+}
+
 export const COLOR_SCHEMES: { value: ColorScheme; label: string }[] = [
   { value: 'solid', label: 'Solid' },
   { value: 'vertical', label: 'Vertical split' },
@@ -299,6 +363,7 @@ export function normalizeCampaign(campaign: Partial<Campaign>): Campaign {
     ...campaign,
     battles: (campaign.battles ?? []).map(normalizeBattle),
     map: normalizeCampaignMap(campaign.map),
+    readOnly: campaign.readOnly === true,
   };
 }
 

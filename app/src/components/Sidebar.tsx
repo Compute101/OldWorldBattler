@@ -35,6 +35,7 @@ interface Props {
   onEndTurn: () => void;
   onAddLogNote: (note: string, unitId: string | null) => void;
   onRemoveLogEntry: (id: string) => void;
+  readOnly?: boolean;
 }
 
 const EDGES: DeploymentZones['edges'] = ['north', 'south', 'east', 'west'];
@@ -57,6 +58,7 @@ export default function Sidebar({
   onEndTurn,
   onAddLogNote,
   onRemoveLogEntry,
+  readOnly = false,
 }: Props) {
   const selectedUnit =
     selection?.type === 'unit' ? board.units.find((u) => u.id === selection.id) ?? null : null;
@@ -89,6 +91,8 @@ export default function Sidebar({
         </button>
       </div>
 
+      <fieldset className="sidebar-fieldset" disabled={readOnly}>
+      {readOnly && <p className="sidebar-readonly-note">Global campaign — view only</p>}
       <section>
         <h3>Battle</h3>
         <div className="row">
@@ -495,6 +499,7 @@ export default function Sidebar({
             >
               <option value="rect">Rectangle</option>
               <option value="circle">Circle</option>
+              <option value="forest">Forest (trees)</option>
             </select>
           </label>
           <label>
@@ -520,7 +525,7 @@ export default function Sidebar({
                 onChange={(n) => onUpdateTerrain(selectedTerrain.id, { widthIn: n })}
               />
             </label>
-            {selectedTerrain.shape === 'rect' && (
+            {selectedTerrain.shape !== 'circle' && (
               <label>
                 Depth (in)
                 <NumberField
@@ -550,7 +555,7 @@ export default function Sidebar({
               />
             </label>
           </div>
-          {selectedTerrain.shape === 'rect' && (
+          {selectedTerrain.shape !== 'circle' && (
             <label>
               Rotation
               <div className="facing-controls">
@@ -582,6 +587,7 @@ export default function Sidebar({
         <h3>Credits</h3>
         <Credits />
       </section>
+      </fieldset>
     </div>
   );
 }
